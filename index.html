@@ -1,393 +1,598 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>國立東港海事 - 實時課程與老師動向查詢系統</title>
-    <style>
-        :root {
-            --primary-color: #0056b3;
-            --secondary-color: #f4f6f9;
-            --card-bg: #ffffff;
-            --text-color: #333;
-        }
-        body {
-            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
-            background-color: var(--secondary-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        h1 {
-            text-align: center;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-        }
-        .card {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .clock-box {
-            text-align: center;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #d9534f;
-        }
-        .time-display {
-            font-size: 2rem;
-            color: var(--primary-color);
-            margin: 10px 0;
-        }
-        .grid-form {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            align-items: center;
-        }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 5px;
-        }
-        select, input, button {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
-            transition: background 0.3s;
-        }
-        button:hover {
-            background-color: #003d80;
-        }
-        .status-badge {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 15px;
-            color: white;
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
-        .bg-teaching { background-color: #28a745; }
-        .bg-free { background-color: #17a2b8; }
-        .bg-off { background-color: #6c757d; }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: center;
-        }
-        th {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>國立東港高級海事水產職業學校 - 全校課表系統</title>
+  <style>
+    :root {
+      --primary-color: #0056b3;
+      --secondary-color: #e9ecef;
+      --accent-color: #007bff;
+      --text-color: #333;
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --border-color: #dee2e6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* 頂部導航欄 */
+    header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .logo-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+
+    .nav-menu {
+      position: relative;
+    }
+
+    .menu-btn {
+      background: none;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+
+    .menu-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 120%;
+      background-color: var(--card-bg);
+      min-width: 180px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border-radius: 4px;
+      overflow: hidden;
+      z-index: 1001;
+    }
+
+    .dropdown-content a {
+      color: var(--text-color);
+      padding: 0.75rem 1rem;
+      text-decoration: none;
+      display: block;
+      font-size: 0.95rem;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+    }
+
+    .dropdown-content a:last-child {
+      border-bottom: none;
+    }
+
+    .dropdown-content a:hover {
+      background-color: var(--secondary-color);
+      color: var(--primary-color);
+    }
+
+    .show {
+      display: block;
+    }
+
+    /* 主體內容區域 */
+    main {
+      flex: 1;
+      padding: 1.5rem;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .dashboard {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* 資訊卡片 */
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      padding: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+      border-bottom: 2px solid var(--secondary-color);
+      padding-bottom: 0.5rem;
+    }
+
+    .current-status {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .status-item {
+      background-color: var(--bg-color);
+      padding: 1rem;
+      border-radius: 6px;
+      border-left: 4px solid var(--accent-color);
+    }
+
+    .status-label {
+      font-size: 0.85rem;
+      color: #6c757d;
+      margin-bottom: 0.25rem;
+    }
+
+    .status-value {
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    /* 課表表格 */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 0.6rem 0.4rem;
+    }
+
+    th {
+      background-color: var(--secondary-color);
+      color: var(--text-color);
+      font-weight: bold;
+    }
+
+    .time-col {
+      background-color: #f1f3f5;
+      font-size: 0.8rem;
+      white-space: nowrap;
+      width: 90px;
+    }
+
+    .current-period {
+      background-color: #e7f5ff !important;
+      font-weight: bold;
+    }
+
+    .active-cell {
+      background-color: #d0ebff !important;
+      border: 2px solid var(--accent-color);
+    }
+
+    /* Modal 彈出視窗 */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    .modal-header {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      color: var(--primary-color);
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .form-group select {
+      width: 100%;
+      padding: 0.6rem;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      font-size: 1rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-color);
+      color: white;
+    }
+
+    .btn-secondary {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    .no-class {
+      color: #868e96;
+      font-style: italic;
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>國立東港高級海事水產職業學校<br>實時課程與教師動向查詢系統</h1>
-
-    <!-- 系統時間卡片 -->
-    <div class="card clock-box">
-        <div>當前系統時間</div>
-        <div class="time-display" id="currentTime">載入中...</div>
-        <div>
-            當前狀態：<span id="currentPeriod" class="status-badge bg-off">讀取中...</span>
-        </div>
+  <!-- 頂部導航 */ -->
+  <header>
+    <div class="logo-title">東港海事課表查詢系統</div>
+    <div class="nav-menu">
+      <button class="menu-btn" onclick="toggleMenu()">選單 ☰</button>
+      <div id="myDropdown" class="dropdown-content">
+        <a onclick="openSettingModal()">1. 班級設定</a>
+        <a onclick="refreshSchedule()">重新整理</a>
+      </div>
     </div>
+  </header>
 
-    <!-- 查詢控制器 -->
-    <div class="card">
-        <h3>查詢條件設定</h3>
-        <div class="grid-form">
-            <div>
-                <label for="searchType">查詢對象類別：</label>
-                <select id="searchType" onchange="toggleSelectOptions()">
-                    <option value="class">按班級查詢課程</option>
-                    <option value="teacher">按老師查詢動向</option>
-                </select>
-            </div>
-            <div>
-                <label for="targetSelect">選擇班級/老師：</label>
-                <select id="targetSelect"></select>
-            </div>
-            <div>
-                <label for="modeSelect">時間模式：</label>
-                <select id="modeSelect" onchange="toggleCustomTime()">
-                    <option value="real">抓取現實時間 (Get Real-Time)</option>
-                    <option value="custom">手動指定時間/星期</option>
-                </select>
-            </div>
+  <!-- 主內容 */ -->
+  <main>
+    <div class="dashboard">
+      <!-- 當前課程資訊卡片 -->
+      <div class="card">
+        <div class="card-title" id="class-title-display">目前班級：未設定</div>
+        <div class="current-status">
+          <div class="status-item">
+            <div class="status-label">目前時間 / 節次</div>
+            <div class="status-value" id="current-time-slot">讀取中...</div>
+          </div>
+          <div class="status-item">
+            <div class="status-label">當前正在進行課程</div>
+            <div class="status-value" id="current-course">無課程或非上課時間</div>
+          </div>
+          <div class="status-item">
+            <div class="status-label">導師 / 授課教師</div>
+            <div class="status-value" id="current-teacher">-</div>
+          </div>
         </div>
+      </div>
 
-        <!-- 手動指定時間選單 (預設隱藏) -->
-        <div id="customTimeBox" class="grid-form" style="display:none; margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 15px;">
-            <div>
-                <label for="customDay">星期：</label>
-                <select id="customDay">
-                    <option value="1">星期一</option>
-                    <option value="2">星期二</option>
-                    <option value="3">星期三</option>
-                    <option value="4">星期四</option>
-                    <option value="5">星期五</option>
-                </select>
-            </div>
-            <div>
-                <label for="customTime">指定時間：</label>
-                <input type="time" id="customTime" value="09:30">
-            </div>
+      <!-- 完整週課表 */ -->
+      <div class="card">
+        <div class="card-title">本週完整課表</div>
+        <div class="table-container">
+          <table id="schedule-table">
+            <thead>
+              <tr>
+                <th>節次 / 時間</th>
+                <th>星期一</th>
+                <th>星期二</th>
+                <th>星期三</th>
+                <th>星期四</th>
+                <th>星期五</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- 由 JavaScript 動態渲染 -->
+            </tbody>
+          </table>
         </div>
-
-        <div style="margin-top: 15px;">
-            <button onclick="executeQuery()">開始查詢</button>
-        </div>
+      </div>
     </div>
+  </main>
 
-    <!-- 查詢結果顯示 -->
-    <div class="card" id="resultCard" style="display:none;">
-        <h3 id="resultTitle">查詢結果</h3>
-        <div id="resultStatus"></div>
-        
-        <h4 style="margin-top:20px;">當日完整課表/行程表</h4>
-        <div style="overflow-x:auto;">
-            <table id="scheduleTable">
-                <thead>
-                    <tr>
-                        <th>節次</th>
-                        <th>時間</th>
-                        <th>科目/行程</th>
-                        <th>地點/對象</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
+  <!-- 班級設定 Modal -->
+  <div id="settingModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">設定預設班級</div>
+      <div class="form-group">
+        <label for="class-select">請選擇您的班級：</label>
+        <select id="class-select">
+          <!-- 動態載入班級選項 -->
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeSettingModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveClassSetting()">儲存並顯示</button>
+      </div>
     </div>
-</div>
+  </div>
 
-<script>
-// 1. 時間節次定義
-const timeTable = [
-    { period: "早自習", start: "07:30", end: "08:10" },
-    { period: "第一節", start: "08:10", end: "09:00" },
-    { period: "第二節", start: "09:10", end: "10:00" },
-    { period: "第三節", start: "10:10", end: "11:00" },
-    { period: "第四節", start: "11:10", end: "12:00" },
-    { period: "午休",   start: "12:00", end: "13:20" },
-    { period: "第五節", start: "13:20", end: "14:10" },
-    { period: "第六節", start: "14:20", end: "15:10" },
-    { period: "第七節", start: "15:20", end: "16:10" },
-    { period: "第八節", start: "16:20", end: "17:10" }
-];
-
-// 2. 班級課表資料庫 (範例擷取 PDF 代表性資料)
-const classSchedules = {
-    "輪一甲": {
-        1: ["", "船用電學(涂乙平)", "電腦輔助繪圖實習(郭文凱/輪機模擬教室)", "輪機概論(蕭守進)", "英語文(張琬美)", "歷史(陳豔顏)", "國語文(鍾秉君)", "國語文(鍾秉君)", ""],
-        2: ["", "體育(賴景炫)", "船用電學(涂乙平)", "生涯規劃(鄭品榛)", "藝術生活(董怡芳)", "英語文(張琬美)", "健康與護理(李怡蓉)", "原住民族語文(蔡叔珮/高美花)", ""],
-        3: ["", "體育(賴景炫)", "輪機概論(蕭守進)", "數學(洪耀臨)", "物理(龔榮志)", "班會(郭文凱)", "週會/聯課活動", "週會/聯課活動", ""],
-        4: ["", "船舶金工實習(簡慶政/郭文凱)", "船舶金工實習(簡慶政/郭文凱)", "船舶金工實習(簡慶政/郭文凱)", "繩纜作業實習(簡慶政/郭文凱)", "繩纜作業實習(簡慶政/郭文凱)", "基礎銲接實習(簡慶政/郭文凱)", "基礎銲接實習(簡慶政/郭文凱)", ""],
-        5: ["", "全民國防教育(卓惠婷)", "數學(洪耀臨)", "歷史(陳豔顏)", "國語文(鍾秉君)", "音樂(朱怡貞)", "物理(龔榮志)", "資訊科技(蔡宗勳)", ""]
-    },
-    "食一甲": {
-        1: ["", "音樂(鐘悅綾)", "生涯規劃(鄭品榛)", "食品概論(鄭伃容)", "食品加工(鄭純華)", "健康與護理(李怡蓉)", "應用英文(孫沛涵)", "英語文(孫沛涵)", ""],
-        2: ["", "全民國防教育(卓惠婷)", "化學(林家偉)", "基礎數學(黃玲玲)", "歷史(陳豔顏)", "閩南語文(許珮旻)", "藝術生活(董怡芳)", "體育(張惠珍)", ""],
-        3: ["", "食品概論(鄭伃容)", "數學(黃玲玲)", "國語文(鍾秉君)", "化學(林家偉)", "週會/聯課活動", "週會/聯課活動", "班會(鄭純華)", ""],
-        4: ["", "烘焙食品加工實習(鄭純華)", "烘焙食品加工實習(鄭純華)", "烘焙食品加工實習(鄭純華)", "烘焙食品加工實習(鄭純華)", "烘焙食品加工實習(鄭純華)", "歷史(陳豔顏)", "食品加工(鄭純華)", ""],
-        5: ["", "數學(黃玲玲)", "國語文(鍾秉君)", "國語文(鍾秉君)", "體育(張惠珍)", "資訊科技(蔡宗勳)", "英語文(孫沛涵)", "食品概論(鄭伃容)", ""]
-    },
-    "管一甲": {
-        1: ["", "體育(郭俊宏)", "物理(龔榮志)", "數學(黃玲玲)", "地理(朱芳慧)", "會計學(陳文雅)", "閩南語文(許珮旻)", "無", ""]
-    }
-};
-
-// 3. 教師課表資料庫 (直接由 PDF 獨立教師課表導出)
-const teacherSchedules = {
-    "伍喜喬": {
-        1: ["", "國語文(管一乙)", "國語文(管一乙)", "國語文(養一甲)", "空空", "空空", "國語文(管三乙)", "空空", ""],
-        2: ["", "空空", "空空", "空空", "國語文(管一乙)", "空空", "空空", "空空", ""],
-        3: ["", "空空", "空空", "國語文(管三乙)", "空空", "國語文(管一甲)", "班會(管三乙)", "空空", ""],
-        4: ["", "空空", "空空", "空空", "國語文(養一甲)", "空空", "空空", "國語文(養一甲)", ""],
-        5: ["", "國語文(管一甲)", "國語文(管一甲)", "空空", "空空", "空空", "空空", "空空", ""]
-    },
-    "陳美偵": {
-        1: ["", "空空", "空空", "空空", "空空", "空空", "空空", "空空", ""],
-        2: ["", "國語文(食三乙)", "國語文(食三乙)", "空空", "國語文(電二乙)", "空空", "空空", "空空", ""],
-        3: ["", "空空", "國語文(管三甲)", "空空", "空空", "國語文(管二乙)", "空空", "空空", ""],
-        4: ["", "國語文(電二乙)", "空空", "空空", "國語文(電二甲)", "空空", "空空", "國語文(電二甲)", ""],
-        5: ["", "國語文(管二乙)", "國語文(管二乙)", "國語文(電二乙)", "國學常識(食三乙)", "空空", "國語文(電二甲)", "國語文(管三甲)", ""]
-    },
-    "蔡叔珮": {
-        1: ["", "空空", "閩南語文(輪一甲)", "空空", "空空", "空空", "空空", "空空", ""],
-        2: ["", "空空", "空空", "空空", "空空", "空空", "空空", "閩南語文(管一乙)", ""],
-        3: ["", "國語文(輪三乙)", "空空", "國語文(家一甲)", "國語文(家一甲)", "空空", "空空", "空空", ""],
-        4: ["", "空空", "空空", "空空", "國語文(家一甲)", "空空", "空空", "空空", ""],
-        5: ["", "空空", "空空", "國語文(輪三乙)", "空空", "空空", "空空", "空空", ""]
-    },
-    "黃瓊瑩": {
-        1: ["", "空空", "國語文(食三甲)", "國語文(食三甲)", "空空", "空空", "空空", "空空", ""],
-        2: ["", "國語文(電一乙)", "國語文(電一乙)", "空空", "國學常識(食三甲)", "空空", "空空", "空空", ""],
-        3: ["", "空空", "空空", "空空", "國語文(食一乙)", "空空", "空空", "班會(電一乙)", ""],
-        4: ["", "空空", "空空", "國語文(食一乙)", "國語文(食一乙)", "空空", "空空", "空空", ""],
-        5: ["", "國語文(電一甲)", "國語文(電一甲)", "空空", "國語文(電一乙)", "空空", "空空", "空空", ""]
-    }
-};
-
-// 初始化選單
-function initSelects() {
-    toggleSelectOptions();
-    setInterval(updateClock, 1000);
-    updateClock();
-}
-
-function toggleSelectOptions() {
-    const type = document.getElementById("searchType").value;
-    const targetSelect = document.getElementById("targetSelect");
-    targetSelect.innerHTML = "";
-
-    let list = [];
-    if (type === "class") {
-        list = Object.keys(classSchedules);
-    } else {
-        list = Object.keys(teacherSchedules);
-    }
-
-    list.forEach(item => {
-        const opt = document.createElement("option");
-        opt.value = item;
-        opt.innerText = item;
-        targetSelect.appendChild(opt);
-    });
-}
-
-function toggleCustomTime() {
-    const mode = document.getElementById("modeSelect").value;
-    document.getElementById("customTimeBox").style.display = (mode === "custom") ? "grid" : "none";
-}
-
-// 取得當前時間與節次資訊
-function getCurrentTimeInfo() {
-    const mode = document.getElementById("modeSelect").value;
-    let day, timeStr;
-
-    if (mode === "real") {
-        const now = new Date();
-        day = now.getDay(); // 0是週日, 1-5是週一至五
-        const hh = String(now.getHours()).padStart(2, '0');
-        const mm = String(now.getMinutes()).padStart(2, '0');
-        timeStr = `${hh}:${mm}`;
-    } else {
-        day = parseInt(document.getElementById("customDay").value);
-        timeStr = document.getElementById("customTime").value;
-    }
-
-    // 計算屬於哪一節
-    let currentPeriodObj = null;
-    let periodIndex = -1;
-
-    for (let i = 0; i < timeTable.length; i++) {
-        if (timeStr >= timeTable[i].start && timeStr < timeTable[i].end) {
-            currentPeriodObj = timeTable[i];
-            periodIndex = i;
-            break;
+  <script>
+    // 課表資料庫[span_0](start_span)[span_0](end_span)
+    const scheduleData = {
+      "電一甲": {
+        mentor: "李怡蓉",
+        schedule: {
+          1: ["資訊科技<br>蔡宗勳", "英語文<br>張琬美", "程式設計實習<br>謝秀宏", "英語文<br>張琬美", "國語文<br>黃瓊瑩"],
+          2: ["數學<br>洪耀臨", "全民國防教育<br>卓惠婷", "程式設計實習<br>謝秀宏", "應用英文<br>張琬美", "國語文<br>黃瓊瑩"],
+          3: ["音樂<br>鐘悅綾", "藝術生活<br>董怡芳", "程式設計實習<br>謝秀宏", "體育<br>郭俊宏", "數學<br>洪耀臨"],
+          4: ["體育<br>郭俊宏", "生涯規劃<br>鄭品榛", "體育<br>郭俊宏", "國語文<br>黃瓊瑩", "數學<br>洪耀臨"],
+          5: ["基礎電子實習<br>李冠章", "地理<br>朱芳慧", "週會/聯課活動", "閩南語文<br>許珮旻", "物理<br>龔榮志"],
+          6: ["基礎電子實習<br>李冠章", "物理<br>龔榮志", "週會/聯課活動", "基本電學<br>梁忠吉", "地理<br>朱芳慧"],
+          7: ["基礎電子實習<br>李冠章", "健康與護理<br>李怡蓉", "班會<br>李怡蓉", "基本電學<br>梁忠吉", "基本電學<br>梁忠吉"]
         }
+      },
+      "電一乙": {
+        mentor: "黃瓊瑩",
+        schedule: {
+          1: ["地理<br>朱芳慧", "國語文<br>黃瓊瑩", "體育<br>郭俊宏", "物理<br>龔榮志", "程式設計實習<br>謝秀宏"],
+          2: ["資訊科技<br>蔡宗勳", "基本電學<br>李冠章", "地理<br>朱芳慧", "數學<br>洪耀臨", "程式設計實習<br>謝秀宏"],
+          3: ["國語文<br>黃瓊瑩", "英語文<br>張琬美", "音樂<br>鐘悅綾", "體育<br>郭俊宏", "程式設計實習<br>謝秀宏"],
+          4: ["基本電學<br>李冠章", "基本電學<br>李冠章", "數學<br>洪耀臨", "健康與護理<br>李怡蓉", "國語文<br>黃瓊瑩"],
+          5: ["數學<br>洪耀臨", "藝術生活<br>董怡芳", "週會/聯課活動", "基礎電子實習<br>李冠章", "生涯規劃<br>鄭品榛"],
+          6: ["數學<br>洪耀臨", "英語文<br>張琬美", "週會/聯課活動", "基礎電子實習<br>李冠章", "閩南語文<br>許珮旻"],
+          7: ["物理<br>龔榮志", "應用英文<br>張琬美", "班會<br>黃瓊瑩", "基礎電子實習<br>李冠章", "全民國防教育<br>卓惠婷"]
+        }
+      },
+      "輪一甲": {
+        mentor: "郭文凱",
+        schedule: {
+          1: ["船用電學<br>涂乙平", "體育<br>賴景炫", "體育<br>賴景炫", "船舶金工實習<br>簡慶政/郭文凱", "全民國防教育<br>卓惠婷"],
+          2: ["電腦輔助繪圖<br>郭文凱", "船用電學<br>涂乙平", "輪機概論<br>蕭守進", "船舶金工實習<br>簡慶政/郭文凱", "數學<br>洪耀臨"],
+          3: ["輪機概論<br>蕭守進", "生涯規劃<br>鄭品榛", "數學<br>洪耀臨", "船舶金工實習<br>簡慶政/郭文凱", "歷史<br>陳豔顏"],
+          4: ["英語文<br>張琬美", "藝術生活<br>董怡芳", "物理<br>龔榮志", "繩纜作業實習<br>簡慶政/郭文凱", "國語文<br>鍾秉君"],
+          5: ["歷史<br>陳豔顏", "原住民族語文", "週會/聯課活動", "繩纜作業實習<br>簡慶政/郭文凱", "音樂<br>朱怡貞"],
+          6: ["國語文<br>鍾秉君", "英語文<br>張琬美", "週會/聯課活動", "基礎銲接實習<br>簡慶政/郭文凱", "物理<br>龔榮志"],
+          7: ["國語文<br>鍾秉君", "健康與護理<br>李怡蓉", "班會<br>郭文凱", "基礎銲接實習<br>簡慶政/郭文凱", "資訊科技<br>蔡宗勳"]
+        }
+      },
+      "輪一乙": {
+        mentor: "洪晟輔",
+        schedule: {
+          1: ["-", "船舶金工實習<br>陳容銜/洪晟輔", "體育<br>賴景炫", "健康與護理<br>李怡蓉", "數學<br>洪耀臨"],
+          2: ["全民國防教育<br>卓惠婷", "船舶金工實習<br>陳容銜/洪晟輔", "英語文<br>張琬美", "電腦輔助繪圖<br>洪晟輔", "生涯規劃<br>鄭品榛"],
+          3: ["數學<br>洪耀臨", "船舶金工實習<br>陳容銜/洪晟輔", "藝術生活<br>董怡芳", "國語文<br>邱玉瑾", "體育<br>賴景炫"],
+          4: ["物理<br>龔榮志", "繩纜作業實習<br>陳容銜/洪晟輔", "船用電學<br>涂乙平", "國語文<br>邱玉瑾", "英語文<br>張琬美"],
+          5: ["輪機概論<br>洪晟輔", "繩纜作業實習<br>陳容銜/洪晟輔", "週會/聯課活動", "物理<br>龔榮志", "閩南語文<br>許珮旻"],
+          6: ["船用電學<br>涂乙平", "基礎銲接實習<br>陳容銜/洪晟輔", "週會/聯課活動", "資訊科技<br>蔡宗勳", "歷史<br>陳豔顏"],
+          7: ["歷史<br>陳豔顏", "基礎銲接實習<br>陳容銜/洪晟輔", "班會<br>洪晟輔", "輪機概論<br>洪晟輔", "音樂<br>朱怡貞"]
+        }
+      },
+      "食一甲": {
+        mentor: "鄭純華",
+        schedule: {
+          1: ["音樂<br>鐘悅綾", "全民國防教育<br>卓惠婷", "食品概論<br>鄭伃容", "烘焙食品加工實習<br>鄭純華", "數學<br>黃玲玲"],
+          2: ["生涯規劃<br>鄭品榛", "化學<br>林家偉", "數學<br>黃玲玲", "烘焙食品加工實習<br>鄭純華", "國語文<br>鍾秉君"],
+          3: ["食品概論<br>鄭伃容", "基礎數學<br>黃玲玲", "國語文<br>鍾秉君", "烘焙食品加工實習<br>鄭純華", "國語文<br>鍾秉君"],
+          4: ["食品加工<br>鄭純華", "歷史<br>陳豔顏", "化學<br>林家偉", "烘焙食品加工實習<br>鄭純華", "體育<br>張惠珍"],
+          5: ["健康與護理<br>李怡蓉", "閩南語文<br>許珮旻", "週會/聯課活動", "烘焙食品加工實習<br>鄭純華", "資訊科技<br>蔡宗勳"],
+          6: ["應用英文<br>孫沛涵", "藝術生活<br>董怡芳", "週會/聯課活動", "歷史<br>陳豔顏", "英語文<br>孫沛涵"],
+          7: ["英語文<br>孫沛涵", "體育<br>張惠珍", "班會<br>鄭純華", "食品加工<br>鄭純華", "食品概論<br>鄭伃容"]
+        }
+      }
+    };
+
+    // 上課時間定義[span_1](start_span)[span_1](end_span)
+    const timeSlots = [
+      { period: 1, name: "第一節", start: "08:10", end: "09:00" },
+      { period: 2, name: "第二節", start: "09:10", end: "10:00" },
+      { period: 3, name: "第三節", start: "10:10", end: "11:00" },
+      { period: 4, name: "第四節", start: "11:10", end: "12:00" },
+      { period: 5, name: "第五節", start: "13:20", end: "14:10" },
+      { period: 6, name: "第六節", start: "14:20", end: "15:10" },
+      { period: 7, name: "第七節", start: "15:20", end: "16:10" }
+    ];
+
+    let currentClass = localStorage.getItem("user_class") || "";
+
+    // 初始化頁面
+    window.onload = function() {
+      populateClassOptions();
+      if (!currentClass) {
+        openSettingModal();
+      } else {
+        renderSchedule();
+      }
+      setInterval(updateCurrentCourseDisplay, 1000); // 動態更新當前課程
+    };
+
+    function populateClassOptions() {
+      const select = document.getElementById("class-select");
+      select.innerHTML = "";
+      Object.keys(scheduleData).forEach(className => {
+        const option = document.createElement("option");
+        option.value = className;
+        option.textContent = className;
+        if (className === currentClass) option.selected = true;
+        select.appendChild(option);
+      });
     }
 
-    return { day, timeStr, currentPeriodObj, periodIndex };
-}
-
-function updateClock() {
-    const now = new Date();
-    const days = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
-    const timeString = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${days[now.getDay()]} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-    document.getElementById("currentTime").innerText = timeString;
-
-    const info = getCurrentTimeInfo();
-    const badge = document.getElementById("currentPeriod");
-    if (info.currentPeriodObj) {
-        badge.innerText = `${info.currentPeriodObj.period} (${info.currentPeriodObj.start}~${info.currentPeriodObj.end})`;
-        badge.className = "status-badge bg-teaching";
-    } else {
-        badge.innerText = "非上課/在校時間";
-        badge.className = "status-badge bg-off";
+    function toggleMenu() {
+      document.getElementById("myDropdown").classList.toggle("show");
     }
-}
 
-function executeQuery() {
-    const type = document.getElementById("searchType").value;
-    const target = document.getElementById("targetSelect").value;
-    const timeInfo = getCurrentTimeInfo();
+    // 點擊外部關閉選單
+    window.onclick = function(event) {
+      if (!event.target.matches('.menu-btn')) {
+        const dropdowns = document.getElementsByClassName("dropdown-content");
+        for (let i = 0; i < dropdowns.length; i++) {
+          let openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    };
 
-    if (timeInfo.day === 0 || timeInfo.day === 6) {
-        alert("週末非上課日，無課表資訊！");
+    function openSettingModal() {
+      document.getElementById("settingModal").style.display = "flex";
+    }
+
+    function closeSettingModal() {
+      document.getElementById("settingModal").style.display = "none";
+    }
+
+    function saveClassSetting() {
+      const selected = document.getElementById("class-select").value;
+      if (selected) {
+        currentClass = selected;
+        localStorage.setItem("user_class", currentClass);
+        renderSchedule();
+        closeSettingModal();
+      }
+    }
+
+    function refreshSchedule() {
+      renderSchedule();
+    }
+
+    // 渲染課表
+    function renderSchedule() {
+      const titleDisplay = document.getElementById("class-title-display");
+      const tbody = document.querySelector("#schedule-table tbody");
+      tbody.innerHTML = "";
+
+      if (!currentClass || !scheduleData[currentClass]) {
+        titleDisplay.textContent = "目前班級：未設定";
         return;
-    }
+      }
 
-    document.getElementById("resultCard").style.display = "block";
-    document.getElementById("resultTitle").innerText = `查詢對象：${target} (${type === 'class' ? '班級課表' : '老師動向'})`;
+      const classInfo = scheduleData[currentClass];
+      titleDisplay.textContent = `目前班級：${currentClass} (導師：${classInfo.mentor})`;
 
-    const tbody = document.querySelector("#scheduleTable tbody");
-    tbody.innerHTML = "";
-
-    const scheduleData = (type === "class") ? classSchedules[target] : teacherSchedules[target];
-    const daySchedule = scheduleData ? scheduleData[timeInfo.day] : null;
-
-    let currentAction = "無課程 / 休息中";
-
-    timeTable.forEach((t, idx) => {
+      timeSlots.forEach(slot => {
         const tr = document.createElement("tr");
-        let course = (daySchedule && daySchedule[idx]) ? daySchedule[idx] : "無排課 / 空堂";
+        tr.id = `row-period-${slot.period}`;
         
-        // 判斷當前節次高亮
-        if (timeInfo.currentPeriodObj && timeInfo.currentPeriodObj.period === t.period) {
-            tr.style.backgroundColor = "#ffe3e3";
-            tr.style.fontWeight = "bold";
-            currentAction = course;
+        // 時間欄
+        const tdTime = document.createElement("td");
+        tdTime.className = "time-col";
+        tdTime.innerHTML = `<strong>${slot.name}</strong><br>${slot.start}~${slot.end}`;
+        tr.appendChild(tdTime);
+
+        // 週一至週五
+        for (let day = 0; day < 5; day++) {
+          const td = document.createElement("td");
+          td.id = `cell-${slot.period}-${day + 1}`;
+          const course = classInfo.schedule[slot.period] ? classInfo.schedule[slot.period][day] : "-";
+          td.innerHTML = course || "<span class='no-class'>-</span>";
+          tr.appendChild(td);
         }
 
-        tr.innerHTML = `
-            <td>${t.period}</td>
-            <td>${t.start} ~ ${t.end}</td>
-            <td>${course}</td>
-            <td>${type === 'class' ? '原班教室/專科教室' : (course.includes('空空') ? '教師辦公室' : '授課班級教室')}</td>
-        `;
         tbody.appendChild(tr);
-    });
+      });
 
-    // 顯示當前狀態摘要
-    const statusBox = document.getElementById("resultStatus");
-    statusBox.innerHTML = `
-        <div style="font-size:1.1rem; padding:10px; background:#e9ecef; border-radius:5px; margin-bottom:10px;">
-            <strong>【${timeInfo.currentPeriodObj ? timeInfo.currentPeriodObj.period : '目前時間'}】動向狀態：</strong>
-            <span style="color:#d9534f; font-weight:bold;">${currentAction}</span>
-        </div>
-    `;
-}
+      updateCurrentCourseDisplay();
+    }
 
-window.onload = initSelects;
-</script>
+    // 更新當前課程狀態與高亮 display
+    function updateCurrentCourseDisplay() {
+      if (!currentClass || !scheduleData[currentClass]) return;
 
+      const now = new Date();
+      const currentDay = now.getDay(); // 0 是週日, 1-5 是週一至週五, 6 是週六
+      const currentTimeStr = now.toTimeString().substring(0, 5); // HH:MM
+
+      // 清除舊高亮
+      document.querySelectorAll(".current-period, .active-cell").forEach(el => {
+        el.classList.remove("current-period", "active-cell");
+      });
+
+      let activeSlot = null;
+      for (let slot of timeSlots) {
+        if (currentTimeStr >= slot.start && currentTimeStr <= slot.end) {
+          activeSlot = slot;
+          break;
+        }
+      }
+
+      const timeSlotDisplay = document.getElementById("current-time-slot");
+      const courseDisplay = document.getElementById("current-course");
+      const teacherDisplay = document.getElementById("current-teacher");
+
+      if (currentDay >= 1 && currentDay <= 5) {
+        const dayNames = ["", "週一", "週二", "週三", "週四", "週五"];
+        
+        if (activeSlot) {
+          timeSlotDisplay.textContent = `${dayNames[currentDay]} ${activeSlot.name} (${activeSlot.start}~${activeSlot.end})`;
+          
+          // 高亮欄位
+          const activeRow = document.getElementById(`row-period-${activeSlot.period}`);
+          if (activeRow) activeRow.classList.add("current-period");
+
+          const activeCell = document.getElementById(`cell-${activeSlot.period}-${currentDay}`);
+          if (activeCell) activeCell.classList.add("active-cell");
+
+          const courseContent = scheduleData[currentClass].schedule[activeSlot.period][currentDay - 1];
+          if (courseContent && courseContent !== "-") {
+            const parts = courseContent.split("<br>");
+            courseDisplay.textContent = parts[0] || "無課程";
+            teacherDisplay.textContent = parts[1] || "-";
+          } else {
+            courseDisplay.textContent = "空堂 / 無課程";
+            teacherDisplay.textContent = "-";
+          }
+        } else {
+          timeSlotDisplay.textContent = `${dayNames[currentDay]} (非上課時段)`;
+          courseDisplay.textContent = "目前非上課時間";
+          teacherDisplay.textContent = "-";
+        }
+      } else {
+        timeSlotDisplay.textContent = "週末假期";
+        courseDisplay.textContent = "今日無課表";
+        teacherDisplay.textContent = "-";
+      }
+    }
+  </script>
 </body>
 </html>
