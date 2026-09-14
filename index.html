@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國立東港海事 - 實時課程與老師動向查詢系統</title>
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --secondary-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-color: #333;
+        }
+        body {
+            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .clock-box {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #d9534f;
+        }
+        .time-display {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin: 10px 0;
+        }
+        .grid-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: center;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        select, input, button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #003d80;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .bg-teaching { background-color: #28a745; }
+        .bg-free { background-color: #17a2b8; }
+        .bg-off { background-color: #6c757d; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>國立東港高級海事水產職業學校<br>實時課程與教師動向查詢系統</h1>
+
+    <!-- 系統時間卡片 -->
+    <div class="card clock-box">
+        <div>當前系統時間</div>
+        <div class="time-display" id="currentTime">載入中...</div>
+        <div>
+            當前狀態：<span id="currentPeriod" class="status-badge bg-off">讀取中...</span>
+        </div>
+    </div>
+
+    <!-- 查詢控制器 -->
+    <div class="card">
+        <h3>查詢條件設定</h3>
+        <div class="grid-form">
+            <div>
+                <label for="searchType">查詢對象類別：</label>
+                <select id="searchType" onchange="toggleSelectOptions()">
+                    <option value="class">按班級查詢課程</option>
+                    <option value="teacher">按老師查詢動向</option>
+                </select>
+            </div>
+            <div>
+                <label for="targetSelect">選擇班級/老師：</label>
+                <select id="targetSelect"></select>
+            </div>
+            <div>
+                <label for="modeSelect">時間模式：</label>
+                <select id="modeSelect" onchange="toggleCustomTime()">
+                    <option value="real">抓取現實時間 (Get Real-Time)</option>
+                    <option value="custom">手動指定時間/星期</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 手動指定時間選單 (預設隱藏) -->
+        <div id="customTimeBox" class="grid-form" style="display:none; margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 15px;">
+            <div>
+                <label for="customDay">星期：</label>
+                <select id="customDay">
+                    <option value="1">星期一</option>
+                    <option value="2">星期二</option>
+                    <option value="3">星期三</option>
+                    <option value="4">星期四</option>
+                    <option value="5">星期五</option>
+                </select>
+            </div>
+            <div>
+                <label for="customTime">指定時間：</label>
+                <input type="time" id="customTime" value="09:30">
+            </div>
+        </div>
+
+        <div style="margin-top: 15px;">
+            <button onclick="executeQuery()">開始查詢</button>
+        </div>
+    </div>
+
+    <!-- 查詢結果顯示 -->
+    <div class="card" id="resultCard" style="display:none;">
+        <h3 id="resultTitle">查詢結果</h3>
+        <div id="resultStatus"></div>
+        
+        <h4 style="margin-top:20px;">當日完整課表/行程表</h4>
+        <div style="overflow-x:auto;">
+            <table id="scheduleTable">
+                <thead>
+                    <tr>
+                        <th>節次</th>
+                        <th>時間</th>
+                        <th>科目/行程</th>
+                        <th>地點/對象</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+// 1. 時間節次定義
+const timeTable = [
+    { period: "早自習", start: "07:30", end: "08:10" },
+    { period: "第一節", start: "08:10", end: "09:00" },
+    { period: "第二節", start: "09:10", end: "10:00" },
+    { period: "第三節", start: "10:10", end: "11:00" },
+    { period: "第四節", start: "11:10", end: "12:00" },
+    { period: "午休",   start: "12:00", end: "13:20" },
+    { period: "第五節", start: "13:20", end: "14:10" },
+    { period: "第六節", start: "14:20", end: "15:10" },
+    { period: "第七節", start: "15:20", end: "16:10" },
+    { period: "第八節", start: "16:20", end: "17:10" }
+];
+
+// 2. 班級課表資料庫 (範例擷取 PDF 代表性資料)
+const classSchedules = {
+    "輪一甲": {
+        1: ["", "船用電學(涂乙平)", "電腦輔助繪圖實習(郭文凱/輪機模擬教室)", "輪機概論(蕭守進)", "英語文(張琬美)", "歷史(陳豔顏)", "國語文(鍾秉君)", "國語文(鍾秉君)", ""],
+        2: ["", "體育(賴景炫)", "船用電學(涂乙平)", "生涯規劃(鄭品榛)", "藝術生活(董怡芳)", "英語文(張琬美)", "健康與護理(李怡蓉)", "原住民族語文(蔡叔珮/高美花)", ""],
+        3: ["", "體育(賴景炫)", "輪機概論(蕭守進)", "數學(洪耀臨)", "物理(龔榮志)", "班會(郭文凱)", "週會/聯課活動", "週會/聯課活動", ""],
+        4: ["", "船舶金工實習(簡慶政/郭文凱)", "船舶金工實習(簡慶政/郭文凱)", "船舶金工實習(簡慶政/郭文凱)", "繩纜作業實習(簡慶政/郭文凱)", "繩纜作業實習(簡慶政/郭文凱)", "基礎銲接實習(簡慶政/郭文凱)", "基礎銲接實習(簡慶政/郭文凱)", ""],
+        5: ["", "全民國防教育(卓惠婷)", "數學(洪耀臨)", "歷史(陳豔顏)", "國語文(鍾秉君)", "音樂(朱怡貞)", "物理(龔榮志)", "資訊科技(蔡宗勳)", ""]
+    },
+    "食一甲": {
+        1: ["", "音樂(鐘悅綾)", "生涯規劃(鄭品榛)", "食品概論(鄭伃容)", "食品加工(鄭純華)", "健康與護理(李怡蓉)", "應用英文(孫沛涵)", "英語文(孫沛涵)", ""],
+        2: ["", "全民國防教育(卓惠婷)", "化學(林家偉)", "基礎數學(黃玲玲)", "歷史(陳豔顏)", "閩南語文(許珮旻)", "藝術生活(董怡芳)", "體育(張惠珍)", ""],
+        3: ["", "食品概論(鄭伃容)", "數學(黃玲玲)", "國語文(鍾秉君)", "化學(林家偉)", "週會/聯課活動", "週會/聯課活動", "班會(鄭純華)", ""],
+        4: ["", "烘焙食品加工實習(鄭純華)", "烘焙食品加工實習(鄭純華)", "烘焙食品加工實習(鄭純華)", "烘焙食品加工實習(鄭純華)", "烘焙食品加工實習(鄭純華)", "歷史(陳豔顏)", "食品加工(鄭純華)", ""],
+        5: ["", "數學(黃玲玲)", "國語文(鍾秉君)", "國語文(鍾秉君)", "體育(張惠珍)", "資訊科技(蔡宗勳)", "英語文(孫沛涵)", "食品概論(鄭伃容)", ""]
+    },
+    "管一甲": {
+        1: ["", "體育(郭俊宏)", "物理(龔榮志)", "數學(黃玲玲)", "地理(朱芳慧)", "會計學(陳文雅)", "閩南語文(許珮旻)", "無", ""]
+    }
+};
+
+// 3. 教師課表資料庫 (直接由 PDF 獨立教師課表導出)
+const teacherSchedules = {
+    "伍喜喬": {
+        1: ["", "國語文(管一乙)", "國語文(管一乙)", "國語文(養一甲)", "空空", "空空", "國語文(管三乙)", "空空", ""],
+        2: ["", "空空", "空空", "空空", "國語文(管一乙)", "空空", "空空", "空空", ""],
+        3: ["", "空空", "空空", "國語文(管三乙)", "空空", "國語文(管一甲)", "班會(管三乙)", "空空", ""],
+        4: ["", "空空", "空空", "空空", "國語文(養一甲)", "空空", "空空", "國語文(養一甲)", ""],
+        5: ["", "國語文(管一甲)", "國語文(管一甲)", "空空", "空空", "空空", "空空", "空空", ""]
+    },
+    "陳美偵": {
+        1: ["", "空空", "空空", "空空", "空空", "空空", "空空", "空空", ""],
+        2: ["", "國語文(食三乙)", "國語文(食三乙)", "空空", "國語文(電二乙)", "空空", "空空", "空空", ""],
+        3: ["", "空空", "國語文(管三甲)", "空空", "空空", "國語文(管二乙)", "空空", "空空", ""],
+        4: ["", "國語文(電二乙)", "空空", "空空", "國語文(電二甲)", "空空", "空空", "國語文(電二甲)", ""],
+        5: ["", "國語文(管二乙)", "國語文(管二乙)", "國語文(電二乙)", "國學常識(食三乙)", "空空", "國語文(電二甲)", "國語文(管三甲)", ""]
+    },
+    "蔡叔珮": {
+        1: ["", "空空", "閩南語文(輪一甲)", "空空", "空空", "空空", "空空", "空空", ""],
+        2: ["", "空空", "空空", "空空", "空空", "空空", "空空", "閩南語文(管一乙)", ""],
+        3: ["", "國語文(輪三乙)", "空空", "國語文(家一甲)", "國語文(家一甲)", "空空", "空空", "空空", ""],
+        4: ["", "空空", "空空", "空空", "國語文(家一甲)", "空空", "空空", "空空", ""],
+        5: ["", "空空", "空空", "國語文(輪三乙)", "空空", "空空", "空空", "空空", ""]
+    },
+    "黃瓊瑩": {
+        1: ["", "空空", "國語文(食三甲)", "國語文(食三甲)", "空空", "空空", "空空", "空空", ""],
+        2: ["", "國語文(電一乙)", "國語文(電一乙)", "空空", "國學常識(食三甲)", "空空", "空空", "空空", ""],
+        3: ["", "空空", "空空", "空空", "國語文(食一乙)", "空空", "空空", "班會(電一乙)", ""],
+        4: ["", "空空", "空空", "國語文(食一乙)", "國語文(食一乙)", "空空", "空空", "空空", ""],
+        5: ["", "國語文(電一甲)", "國語文(電一甲)", "空空", "國語文(電一乙)", "空空", "空空", "空空", ""]
+    }
+};
+
+// 初始化選單
+function initSelects() {
+    toggleSelectOptions();
+    setInterval(updateClock, 1000);
+    updateClock();
+}
+
+function toggleSelectOptions() {
+    const type = document.getElementById("searchType").value;
+    const targetSelect = document.getElementById("targetSelect");
+    targetSelect.innerHTML = "";
+
+    let list = [];
+    if (type === "class") {
+        list = Object.keys(classSchedules);
+    } else {
+        list = Object.keys(teacherSchedules);
+    }
+
+    list.forEach(item => {
+        const opt = document.createElement("option");
+        opt.value = item;
+        opt.innerText = item;
+        targetSelect.appendChild(opt);
+    });
+}
+
+function toggleCustomTime() {
+    const mode = document.getElementById("modeSelect").value;
+    document.getElementById("customTimeBox").style.display = (mode === "custom") ? "grid" : "none";
+}
+
+// 取得當前時間與節次資訊
+function getCurrentTimeInfo() {
+    const mode = document.getElementById("modeSelect").value;
+    let day, timeStr;
+
+    if (mode === "real") {
+        const now = new Date();
+        day = now.getDay(); // 0是週日, 1-5是週一至五
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        timeStr = `${hh}:${mm}`;
+    } else {
+        day = parseInt(document.getElementById("customDay").value);
+        timeStr = document.getElementById("customTime").value;
+    }
+
+    // 計算屬於哪一節
+    let currentPeriodObj = null;
+    let periodIndex = -1;
+
+    for (let i = 0; i < timeTable.length; i++) {
+        if (timeStr >= timeTable[i].start && timeStr < timeTable[i].end) {
+            currentPeriodObj = timeTable[i];
+            periodIndex = i;
+            break;
+        }
+    }
+
+    return { day, timeStr, currentPeriodObj, periodIndex };
+}
+
+function updateClock() {
+    const now = new Date();
+    const days = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+    const timeString = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${days[now.getDay()]} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+    document.getElementById("currentTime").innerText = timeString;
+
+    const info = getCurrentTimeInfo();
+    const badge = document.getElementById("currentPeriod");
+    if (info.currentPeriodObj) {
+        badge.innerText = `${info.currentPeriodObj.period} (${info.currentPeriodObj.start}~${info.currentPeriodObj.end})`;
+        badge.className = "status-badge bg-teaching";
+    } else {
+        badge.innerText = "非上課/在校時間";
+        badge.className = "status-badge bg-off";
+    }
+}
+
+function executeQuery() {
+    const type = document.getElementById("searchType").value;
+    const target = document.getElementById("targetSelect").value;
+    const timeInfo = getCurrentTimeInfo();
+
+    if (timeInfo.day === 0 || timeInfo.day === 6) {
+        alert("週末非上課日，無課表資訊！");
+        return;
+    }
+
+    document.getElementById("resultCard").style.display = "block";
+    document.getElementById("resultTitle").innerText = `查詢對象：${target} (${type === 'class' ? '班級課表' : '老師動向'})`;
+
+    const tbody = document.querySelector("#scheduleTable tbody");
+    tbody.innerHTML = "";
+
+    const scheduleData = (type === "class") ? classSchedules[target] : teacherSchedules[target];
+    const daySchedule = scheduleData ? scheduleData[timeInfo.day] : null;
+
+    let currentAction = "無課程 / 休息中";
+
+    timeTable.forEach((t, idx) => {
+        const tr = document.createElement("tr");
+        let course = (daySchedule && daySchedule[idx]) ? daySchedule[idx] : "無排課 / 空堂";
+        
+        // 判斷當前節次高亮
+        if (timeInfo.currentPeriodObj && timeInfo.currentPeriodObj.period === t.period) {
+            tr.style.backgroundColor = "#ffe3e3";
+            tr.style.fontWeight = "bold";
+            currentAction = course;
+        }
+
+        tr.innerHTML = `
+            <td>${t.period}</td>
+            <td>${t.start} ~ ${t.end}</td>
+            <td>${course}</td>
+            <td>${type === 'class' ? '原班教室/專科教室' : (course.includes('空空') ? '教師辦公室' : '授課班級教室')}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    // 顯示當前狀態摘要
+    const statusBox = document.getElementById("resultStatus");
+    statusBox.innerHTML = `
+        <div style="font-size:1.1rem; padding:10px; background:#e9ecef; border-radius:5px; margin-bottom:10px;">
+            <strong>【${timeInfo.currentPeriodObj ? timeInfo.currentPeriodObj.period : '目前時間'}】動向狀態：</strong>
+            <span style="color:#d9534f; font-weight:bold;">${currentAction}</span>
+        </div>
+    `;
+}
+
+window.onload = initSelects;
+</script>
+
+</body>
+</html>
