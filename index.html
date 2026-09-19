@@ -3,23 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>國立東港高級海事水產職業學校 - 全校課表系統</title>
+  <title>課表系統</title>
   <style>
     :root {
-      --primary-color: #0056b3;
-      --secondary-color: #e9ecef;
-      --accent-color: #007bff;
-      --text-color: #333;
-      --bg-color: #f8f9fa;
+      --primary-color: #003366;
+      --secondary-color: #4a6572;
+      --accent-color: #005b96;
+      --success-color: #28a745;
+      --warning-color: #ffc107;
+      --danger-color: #dc3545;
+      --bg-color: #f4f6f9;
       --card-bg: #ffffff;
-      --border-color: #dee2e6;
+      --border-color: #ced4da;
+      --text-color: #212529;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
 
     body {
@@ -28,141 +31,160 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      font-size: 14px;
     }
 
-    /* 頂部導航欄 */
     header {
       background-color: var(--primary-color);
       color: white;
-      padding: 1rem 1.5rem;
+      padding: 0.8rem 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
+      border-bottom: 3px solid #001f3f;
     }
 
-    .logo-title {
-      font-size: 1.25rem;
+    .system-title {
+      font-size: 1.2rem;
       font-weight: bold;
+      letter-spacing: 1px;
     }
 
-    .nav-menu {
-      position: relative;
+    .nav-tabs {
+      display: flex;
+      gap: 0.5rem;
     }
 
-    .menu-btn {
-      background: none;
-      border: 1px solid rgba(255, 255, 255, 0.6);
+    .nav-tab {
+      background-color: rgba(255, 255, 255, 0.1);
       color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
       padding: 0.5rem 1rem;
       border-radius: 4px;
       cursor: pointer;
-      font-size: 0.95rem;
-      transition: all 0.2s;
+      font-size: 0.9rem;
     }
 
-    .menu-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      right: 0;
-      top: 120%;
-      background-color: var(--card-bg);
-      min-width: 180px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      border-radius: 4px;
-      overflow: hidden;
-      z-index: 1001;
-    }
-
-    .dropdown-content a {
-      color: var(--text-color);
-      padding: 0.75rem 1rem;
-      text-decoration: none;
-      display: block;
-      font-size: 0.95rem;
-      border-bottom: 1px solid var(--border-color);
-      cursor: pointer;
-    }
-
-    .dropdown-content a:last-child {
-      border-bottom: none;
-    }
-
-    .dropdown-content a:hover {
-      background-color: var(--secondary-color);
+    .nav-tab.active {
+      background-color: white;
       color: var(--primary-color);
+      font-weight: bold;
     }
 
-    .show {
-      display: block;
-    }
-
-    /* 主體內容區域 */
     main {
       flex: 1;
-      padding: 1.5rem;
-      max-width: 1200px;
+      padding: 1.25rem;
+      max-width: 1400px;
       width: 100%;
       margin: 0 auto;
     }
 
-    .dashboard {
-      display: flex;
+    .view-panel {
+      display: none;
       flex-direction: column;
-      gap: 1.5rem;
+      gap: 1.25rem;
     }
 
-    /* 資訊卡片 */
+    .view-panel.active {
+      display: flex;
+    }
+
     .card {
       background-color: var(--card-bg);
-      border-radius: 8px;
+      border-radius: 4px;
       border: 1px solid var(--border-color);
-      padding: 1.25rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      padding: 1rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
 
-    .card-title {
-      font-size: 1.1rem;
+    .card-header {
+      font-size: 1rem;
       font-weight: bold;
       color: var(--primary-color);
-      margin-bottom: 1rem;
-      border-bottom: 2px solid var(--secondary-color);
-      padding-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 0.4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    .current-status {
+    .filter-bar {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      background-color: #e9ecef;
+      padding: 0.75rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .filter-group label {
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    select, input, button {
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    button {
+      cursor: pointer;
+      background-color: var(--secondary-color);
+      color: white;
+      border: none;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    .status-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 1rem;
     }
 
-    .status-item {
-      background-color: var(--bg-color);
-      padding: 1rem;
-      border-radius: 6px;
-      border-left: 4px solid var(--accent-color);
+    .status-box {
+      background-color: #f8f9fa;
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--primary-color);
+      padding: 0.75rem;
     }
 
-    .status-label {
-      font-size: 0.85rem;
+    .status-box .label {
+      font-size: 0.8rem;
       color: #6c757d;
-      margin-bottom: 0.25rem;
     }
 
-    .status-value {
-      font-size: 1.1rem;
+    .status-box .value {
+      font-size: 1rem;
       font-weight: bold;
+      margin-top: 0.25rem;
     }
 
-    /* 課表表格 */
-    .table-container {
+    .table-responsive {
       overflow-x: auto;
     }
 
@@ -170,38 +192,62 @@
       width: 100%;
       border-collapse: collapse;
       text-align: center;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
 
     th, td {
       border: 1px solid var(--border-color);
-      padding: 0.6rem 0.4rem;
+      padding: 0.5rem;
     }
 
     th {
-      background-color: var(--secondary-color);
-      color: var(--text-color);
-      font-weight: bold;
+      background-color: #e9ecef;
+      color: #495057;
     }
 
     .time-col {
       background-color: #f1f3f5;
-      font-size: 0.8rem;
-      white-space: nowrap;
-      width: 90px;
+      font-weight: bold;
+      width: 110px;
     }
 
-    .current-period {
-      background-color: #e7f5ff !important;
+    .activity-row {
+      background-color: #fff9db;
+      font-weight: bold;
+      color: #856404;
+    }
+
+    .occupied {
+      background-color: #e7f5ff;
+    }
+
+    .free {
+      background-color: #f8f9fa;
+      color: #adb5bd;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .form-group label {
       font-weight: bold;
     }
 
-    .active-cell {
-      background-color: #d0ebff !important;
-      border: 2px solid var(--accent-color);
+    .swap-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
     }
 
-    /* Modal 彈出視窗 */
     .modal {
       display: none;
       position: fixed;
@@ -216,113 +262,106 @@
     }
 
     .modal-content {
-      background-color: var(--card-bg);
-      border-radius: 8px;
+      background-color: white;
       padding: 1.5rem;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    }
-
-    .modal-header {
-      font-size: 1.2rem;
-      font-weight: bold;
-      margin-bottom: 1rem;
-      color: var(--primary-color);
-    }
-
-    .form-group {
-      margin-bottom: 1.25rem;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-size: 0.95rem;
-    }
-
-    .form-group select {
-      width: 100%;
-      padding: 0.6rem;
       border-radius: 4px;
-      border: 1px solid var(--border-color);
-      font-size: 1rem;
+      width: 500px;
+      max-width: 90%;
     }
 
-    .modal-actions {
+    .modal-footer {
       display: flex;
       justify-content: flex-end;
       gap: 0.5rem;
+      margin-top: 1rem;
     }
 
-    .btn {
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-      border: none;
-      cursor: pointer;
-      font-size: 0.95rem;
-    }
-
-    .btn-primary {
-      background-color: var(--accent-color);
+    .badge {
+      display: inline-block;
+      padding: 0.25em 0.4em;
+      font-size: 75%;
+      font-weight: 700;
+      border-radius: 0.25rem;
       color: white;
     }
 
-    .btn-secondary {
-      background-color: #6c757d;
-      color: white;
-    }
-
-    .no-class {
-      color: #868e96;
-      font-style: italic;
-    }
+    .badge-info { background-color: #17a2b8; }
+    .badge-secondary { background-color: #6c757d; }
+    .badge-warning { background-color: #ffc107; color: #212529; }
   </style>
 </head>
 <body>
 
-  <!-- 頂部導航 */ -->
   <header>
-    <div class="logo-title">東港海事課表查詢系統</div>
-    <div class="nav-menu">
-      <button class="menu-btn" onclick="toggleMenu()">選單 ☰</button>
-      <div id="myDropdown" class="dropdown-content">
-        <a onclick="openSettingModal()">1. 班級設定</a>
-        <a onclick="refreshSchedule()">重新整理</a>
-      </div>
+    <div class="system-title">國立東港高級海事水產職業學校 教務管理系統</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="switchTab('dashboard')">即時調度監控</button>
+      <button class="nav-tab" onclick="switchTab('class-schedule')">班級課表查詢</button>
+      <button class="nav-tab" onclick="switchTab('teacher-schedule')">教師動態查詢</button>
+      <button class="nav-tab" onclick="switchTab('swap-course')">代調課管理</button>
+      <button class="nav-tab" onclick="switchTab('data-setting')">基本資料設定</button>
     </div>
   </header>
 
-  <!-- 主內容 */ -->
   <main>
-    <div class="dashboard">
-      <!-- 當前課程資訊卡片 -->
+    <div id="panel-dashboard" class="view-panel active">
       <div class="card">
-        <div class="card-title" id="class-title-display">目前班級：未設定</div>
-        <div class="current-status">
-          <div class="status-item">
-            <div class="status-label">目前時間 / 節次</div>
-            <div class="status-value" id="current-time-slot">讀取中...</div>
+        <div class="card-header">目前全校節次動態監視</div>
+        <div class="status-grid">
+          <div class="status-box">
+            <div class="label">當前系統時間</div>
+            <div class="value" id="dash-time">---</div>
           </div>
-          <div class="status-item">
-            <div class="status-label">當前正在進行課程</div>
-            <div class="status-value" id="current-course">無課程或非上課時間</div>
+          <div class="status-box">
+            <div class="label">當前對應節次 / 作息</div>
+            <div class="value" id="dash-period">---</div>
           </div>
-          <div class="status-item">
-            <div class="status-label">導師 / 授課教師</div>
-            <div class="status-value" id="current-teacher">-</div>
+          <div class="status-box">
+            <div class="label">正在授課教師總數</div>
+            <div class="value" id="dash-active-teachers">0 人</div>
+          </div>
+          <div class="status-box">
+            <div class="label">空堂備用教師總數</div>
+            <div class="value" id="dash-free-teachers">0 人</div>
           </div>
         </div>
       </div>
 
-      <!-- 完整週課表 */ -->
       <div class="card">
-        <div class="card-title">本週完整課表</div>
-        <div class="table-container">
-          <table id="schedule-table">
+        <div class="card-header">當前節次全校教師位置快照</div>
+        <div class="table-responsive">
+          <table id="table-realtime-monitor">
             <thead>
               <tr>
-                <th>節次 / 時間</th>
+                <th>教師姓名</th>
+                <th>任教科目</th>
+                <th>授課班級</th>
+                <th>目前狀態</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-class-schedule" class="view-panel">
+      <div class="card">
+        <div class="filter-bar">
+          <div class="filter-group">
+            <label for="select-class">選擇班級：</label>
+            <select id="select-class" onchange="renderClassSchedule()"></select>
+          </div>
+          <div class="filter-group">
+            <span id="class-mentor-info" class="badge badge-info"></span>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table id="table-class-schedule">
+            <thead>
+              <tr>
+                <th>時段 / 時間</th>
                 <th>星期一</th>
                 <th>星期二</th>
                 <th>星期三</th>
@@ -331,34 +370,167 @@
               </tr>
             </thead>
             <tbody>
-              <!-- 由 JavaScript 動態渲染 -->
             </tbody>
           </table>
         </div>
       </div>
     </div>
+
+    <div id="panel-teacher-schedule" class="view-panel">
+      <div class="card">
+        <div class="filter-bar">
+          <div class="filter-group">
+            <label for="select-teacher">選擇教師：</label>
+            <select id="select-teacher" onchange="renderTeacherSchedule()"></select>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table id="table-teacher-schedule">
+            <thead>
+              <tr>
+                <th>時段 / 時間</th>
+                <th>星期一</th>
+                <th>星期二</th>
+                <th>星期三</th>
+                <th>星期四</th>
+                <th>星期五</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-swap-course" class="view-panel">
+      <div class="card">
+        <div class="card-header">教師代課/調課異動登記作業</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="swap-type">異動類型</label>
+            <select id="swap-type" onchange="toggleSwapMode()">
+              <option value="substitute">代理抽換 (單向代課)</option>
+              <option value="exchange">對調課 (兩位教師課表對調)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="swap-class">影響班級</label>
+            <select id="swap-class" onchange="updateSwapOptions()"></select>
+          </div>
+        </div>
+        <hr style="margin: 1rem 0; border: 0; border-top: 1px solid var(--border-color);">
+        <div class="swap-panel">
+          <div style="border: 1px solid var(--border-color); padding: 1rem; border-radius: 4px;">
+            <h4 style="margin-bottom: 0.5rem;">原排定課程 (甲方)</h4>
+            <div class="form-group">
+              <label for="swap-day-1">星期</label>
+              <select id="swap-day-1" onchange="updateSwapOptions()">
+                <option value="1">星期一</option>
+                <option value="2">星期二</option>
+                <option value="3">星期三</option>
+                <option value="4">星期四</option>
+                <option value="5">星期五</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-top: 0.5rem;">
+              <label for="swap-period-1">節次</label>
+              <select id="swap-period-1" onchange="updateSwapOriginalCourse()"></select>
+            </div>
+            <div class="form-group" style="margin-top: 0.5rem;">
+              <label>原課程內容</label>
+              <input type="text" id="swap-orig-info" readonly style="background-color: #e9ecef;">
+            </div>
+          </div>
+
+          <div style="border: 1px solid var(--border-color); padding: 1rem; border-radius: 4px;">
+            <h4 style="margin-bottom: 0.5rem;" id="target-header">代課教師設定 (乙方)</h4>
+            <div class="form-group" id="group-target-teacher">
+              <label for="swap-target-teacher">選擇代理教師</label>
+              <select id="swap-target-teacher"></select>
+            </div>
+            <div id="group-exchange-only" style="display: none;">
+              <div class="form-group">
+                <label for="swap-day-2">對調星期</label>
+                <select id="swap-day-2">
+                  <option value="1">星期一</option>
+                  <option value="2">星期二</option>
+                  <option value="3">星期三</option>
+                  <option value="4">星期四</option>
+                  <option value="5">星期五</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-top: 0.5rem;">
+                <label for="swap-period-2">對調節次</label>
+                <select id="swap-period-2"></select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top: 1rem; text-align: right;">
+          <button class="btn-primary" onclick="executeSwapCourse()">執行異動更新</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-data-setting" class="view-panel">
+      <div class="card">
+        <div class="card-header">
+          系統資料庫管理
+          <div>
+            <button class="btn-primary" onclick="openAddClassModal()">新增班級課表</button>
+            <button class="btn-success" onclick="openAddTeacherModal()">新增教師資料</button>
+            <button class="btn-danger" onclick="resetToDefaultData()">恢復預設資料</button>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div>
+            <h4>已建立班級列表</h4>
+            <ul id="list-classes" style="margin-top: 0.5rem; padding-left: 1.2rem;"></ul>
+          </div>
+          <div>
+            <h4>已建立教師列表</h4>
+            <ul id="list-teachers" style="margin-top: 0.5rem; padding-left: 1.2rem;"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 
-  <!-- 班級設定 Modal -->
-  <div id="settingModal" class="modal">
+  <div id="modal-add-class" class="modal">
     <div class="modal-content">
-      <div class="modal-header">設定預設班級</div>
-      <div class="form-group">
-        <label for="class-select">請選擇您的班級：</label>
-        <select id="class-select">
-          <!-- 動態載入班級選項 -->
-        </select>
+      <h3>新增班級與基本課表</h3>
+      <div class="form-group" style="margin-top: 0.8rem;">
+        <label for="modal-class-name">班級名稱</label>
+        <input type="text" id="modal-class-name" placeholder="例：資三甲">
       </div>
-      <div class="modal-actions">
-        <button class="btn btn-secondary" onclick="closeSettingModal()">取消</button>
-        <button class="btn btn-primary" onclick="saveClassSetting()">儲存並顯示</button>
+      <div class="form-group" style="margin-top: 0.8rem;">
+        <label for="modal-class-mentor">導師姓名</label>
+        <input type="text" id="modal-class-mentor" placeholder="例：王小明">
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeModal('modal-add-class')">取消</button>
+        <button class="btn-primary" onclick="saveNewClass()">儲存</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-add-teacher" class="modal">
+    <div class="modal-content">
+      <h3>新增教師資料</h3>
+      <div class="form-group" style="margin-top: 0.8rem;">
+        <label for="modal-teacher-name">教師姓名</label>
+        <input type="text" id="modal-teacher-name" placeholder="例：陳大為">
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeModal('modal-add-teacher')">取消</button>
+        <button class="btn-primary" onclick="saveNewTeacher()">儲存</button>
       </div>
     </div>
   </div>
 
   <script>
-    // 課表資料庫[span_0](start_span)[span_0](end_span)
-    const scheduleData = {
+    const defaultScheduleData = {
       "電一甲": {
         mentor: "李怡蓉",
         schedule: {
@@ -421,177 +593,496 @@
       }
     };
 
-    // 上課時間定義[span_1](start_span)[span_1](end_span)
-    const timeSlots = [
-      { period: 1, name: "第一節", start: "08:10", end: "09:00" },
-      { period: 2, name: "第二節", start: "09:10", end: "10:00" },
-      { period: 3, name: "第三節", start: "10:10", end: "11:00" },
-      { period: 4, name: "第四節", start: "11:10", end: "12:00" },
-      { period: 5, name: "第五節", start: "13:20", end: "14:10" },
-      { period: 6, name: "第六節", start: "14:20", end: "15:10" },
-      { period: 7, name: "第七節", start: "15:20", end: "16:10" }
+    const scheduleTimeline = [
+      { id: "morning", type: "activity", name: "早自習 / 升旗", start: "07:50", end: "08:10", dayDetails: { 1: "學生自主規劃運用時間", 2: "學生自主規劃運用時間", 3: "升旗", 4: "學生自主規劃運用時間", 5: "學生自主規劃運用時間" } },
+      { id: "p1", type: "period", period: 1, name: "第一節", start: "08:10", end: "09:00" },
+      { id: "p2", type: "period", period: 2, name: "第二節", start: "09:10", end: "10:00" },
+      { id: "p3", type: "period", period: 3, name: "第三節", start: "10:10", end: "11:00" },
+      { id: "p4", type: "period", period: 4, name: "第四節", start: "11:10", end: "12:00" },
+      { id: "lunch", type: "activity", name: "午餐", start: "12:00", end: "12:25", fixedContent: "午餐" },
+      { id: "clean", type: "activity", name: "整理環境", start: "12:25", end: "12:45", fixedContent: "整理環境" },
+      { id: "nap", type: "activity", name: "午休", start: "12:45", end: "13:15", fixedContent: "午休" },
+      { id: "p5", type: "period", period: 5, name: "第五節", start: "13:20", end: "14:10" },
+      { id: "p6", type: "period", period: 6, name: "第六節", start: "14:20", end: "15:10" },
+      { id: "p7", type: "period", period: 7, name: "第七節", start: "15:20", end: "16:10" }
     ];
 
-    let currentClass = localStorage.getItem("user_class") || "";
+    const timeSlots = scheduleTimeline.filter(item => item.type === "period");
 
-    // 初始化頁面
+    let systemScheduleData = {};
+    let systemTeachersList = [];
+
     window.onload = function() {
-      populateClassOptions();
-      if (!currentClass) {
-        openSettingModal();
-      } else {
-        renderSchedule();
-      }
-      setInterval(updateCurrentCourseDisplay, 1000); // 動態更新當前課程
+      loadLocalStorageData();
+      initUI();
+      setInterval(updateRealtimeMonitor, 5000);
+      updateRealtimeMonitor();
     };
 
-    function populateClassOptions() {
-      const select = document.getElementById("class-select");
-      select.innerHTML = "";
-      Object.keys(scheduleData).forEach(className => {
-        const option = document.createElement("option");
-        option.value = className;
-        option.textContent = className;
-        if (className === currentClass) option.selected = true;
-        select.appendChild(option);
+    function loadLocalStorageData() {
+      const storedSchedule = localStorage.getItem("admin_schedule_data");
+      if (storedSchedule) {
+        systemScheduleData = JSON.parse(storedSchedule);
+      } else {
+        systemScheduleData = JSON.parse(JSON.stringify(defaultScheduleData));
+        localStorage.setItem("admin_schedule_data", JSON.stringify(systemScheduleData));
+      }
+
+      const storedTeachers = localStorage.getItem("admin_teachers_list");
+      if (storedTeachers) {
+        systemTeachersList = JSON.parse(storedTeachers);
+      } else {
+        extractAndSaveTeachers();
+      }
+    }
+
+    function extractAndSaveTeachers() {
+      const teacherSet = new Set();
+      Object.keys(systemScheduleData).forEach(cls => {
+        const info = systemScheduleData[cls];
+        if (info.mentor) teacherSet.add(info.mentor);
+        Object.keys(info.schedule).forEach(p => {
+          info.schedule[p].forEach(cell => {
+            if (cell && cell !== "-") {
+              const parts = cell.split("<br>");
+              if (parts[1]) {
+                const names = parts[1].split("/");
+                names.forEach(n => teacherSet.add(n.trim()));
+              }
+            }
+          });
+        });
+      });
+      systemTeachersList = Array.from(teacherSet).sort();
+      localStorage.setItem("admin_teachers_list", JSON.stringify(systemTeachersList));
+    }
+
+    function saveScheduleData() {
+      localStorage.setItem("admin_schedule_data", JSON.stringify(systemScheduleData));
+    }
+
+    function saveTeachersData() {
+      localStorage.setItem("admin_teachers_list", JSON.stringify(systemTeachersList));
+    }
+
+    function resetToDefaultData() {
+      if (confirm("確認恢復為系統初始預設的115學年度上學期課表資料？自訂資料將會被覆蓋。")) {
+        systemScheduleData = JSON.parse(JSON.stringify(defaultScheduleData));
+        localStorage.setItem("admin_schedule_data", JSON.stringify(systemScheduleData));
+        extractAndSaveTeachers();
+        initUI();
+        alert("資料已重置為預設課表。");
+      }
+    }
+
+    function initUI() {
+      populateClassDropdowns();
+      populateTeacherDropdowns();
+      renderClassSchedule();
+      renderTeacherSchedule();
+      updateSwapOptions();
+      renderDataManagementLists();
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll(".nav-tab").forEach(tab => tab.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(panel => panel.classList.remove("active"));
+      
+      event.target.classList.add("active");
+      document.getElementById(`panel-${tabId}`).classList.add("active");
+
+      if (tabId === 'dashboard') updateRealtimeMonitor();
+    }
+
+    function populateClassDropdowns() {
+      const selectClass = document.getElementById("select-class");
+      const swapClass = document.getElementById("swap-class");
+      selectClass.innerHTML = "";
+      swapClass.innerHTML = "";
+
+      Object.keys(systemScheduleData).forEach(cls => {
+        const opt1 = document.createElement("option");
+        opt1.value = cls;
+        opt1.textContent = cls;
+        selectClass.appendChild(opt1);
+
+        const opt2 = document.createElement("option");
+        opt2.value = cls;
+        opt2.textContent = cls;
+        swapClass.appendChild(opt2);
       });
     }
 
-    function toggleMenu() {
-      document.getElementById("myDropdown").classList.toggle("show");
+    function populateTeacherDropdowns() {
+      const selectTeacher = document.getElementById("select-teacher");
+      const swapTargetTeacher = document.getElementById("swap-target-teacher");
+      selectTeacher.innerHTML = "";
+      swapTargetTeacher.innerHTML = "";
+
+      systemTeachersList.forEach(t => {
+        const opt1 = document.createElement("option");
+        opt1.value = t;
+        opt1.textContent = t;
+        selectTeacher.appendChild(opt1);
+
+        const opt2 = document.createElement("option");
+        opt2.value = t;
+        opt2.textContent = t;
+        swapTargetTeacher.appendChild(opt2);
+      });
     }
 
-    // 點擊外部關閉選單
-    window.onclick = function(event) {
-      if (!event.target.matches('.menu-btn')) {
-        const dropdowns = document.getElementsByClassName("dropdown-content");
-        for (let i = 0; i < dropdowns.length; i++) {
-          let openDropdown = dropdowns[i];
-          if (openDropdown.classList.contains('show')) {
-            openDropdown.classList.remove('show');
-          }
-        }
-      }
-    };
-
-    function openSettingModal() {
-      document.getElementById("settingModal").style.display = "flex";
-    }
-
-    function closeSettingModal() {
-      document.getElementById("settingModal").style.display = "none";
-    }
-
-    function saveClassSetting() {
-      const selected = document.getElementById("class-select").value;
-      if (selected) {
-        currentClass = selected;
-        localStorage.setItem("user_class", currentClass);
-        renderSchedule();
-        closeSettingModal();
-      }
-    }
-
-    function refreshSchedule() {
-      renderSchedule();
-    }
-
-    // 渲染課表
-    function renderSchedule() {
-      const titleDisplay = document.getElementById("class-title-display");
-      const tbody = document.querySelector("#schedule-table tbody");
+    function renderClassSchedule() {
+      const cls = document.getElementById("select-class").value;
+      const tbody = document.querySelector("#table-class-schedule tbody");
+      const mentorSpan = document.getElementById("class-mentor-info");
       tbody.innerHTML = "";
 
-      if (!currentClass || !scheduleData[currentClass]) {
-        titleDisplay.textContent = "目前班級：未設定";
-        return;
-      }
+      if (!cls || !systemScheduleData[cls]) return;
 
-      const classInfo = scheduleData[currentClass];
-      titleDisplay.textContent = `目前班級：${currentClass} (導師：${classInfo.mentor})`;
+      mentorSpan.textContent = `班導師：${systemScheduleData[cls].mentor}`;
 
-      timeSlots.forEach(slot => {
+      scheduleTimeline.forEach(item => {
         const tr = document.createElement("tr");
-        tr.id = `row-period-${slot.period}`;
-        
-        // 時間欄
-        const tdTime = document.createElement("td");
-        tdTime.className = "time-col";
-        tdTime.innerHTML = `<strong>${slot.name}</strong><br>${slot.start}~${slot.end}`;
-        tr.appendChild(tdTime);
-
-        // 週一至週五
-        for (let day = 0; day < 5; day++) {
-          const td = document.createElement("td");
-          td.id = `cell-${slot.period}-${day + 1}`;
-          const course = classInfo.schedule[slot.period] ? classInfo.schedule[slot.period][day] : "-";
-          td.innerHTML = course || "<span class='no-class'>-</span>";
-          tr.appendChild(td);
+        if (item.type === "activity") {
+          tr.className = "activity-row";
         }
 
+        const tdTime = document.createElement("td");
+        tdTime.className = "time-col";
+        tdTime.innerHTML = `${item.name}<br>${item.start}~${item.end}`;
+        tr.appendChild(tdTime);
+
+        for (let day = 1; day <= 5; day++) {
+          const td = document.createElement("td");
+          if (item.type === "activity") {
+            if (item.dayDetails) {
+              td.innerHTML = item.dayDetails[day];
+            } else {
+              td.innerHTML = item.fixedContent;
+            }
+          } else {
+            const course = systemScheduleData[cls].schedule[item.period] ? systemScheduleData[cls].schedule[item.period][day - 1] : "-";
+            td.innerHTML = course || "-";
+          }
+          tr.appendChild(td);
+        }
         tbody.appendChild(tr);
       });
-
-      updateCurrentCourseDisplay();
     }
 
-    // 更新當前課程狀態與高亮 display
-    function updateCurrentCourseDisplay() {
-      if (!currentClass || !scheduleData[currentClass]) return;
+    function renderTeacherSchedule() {
+      const teacher = document.getElementById("select-teacher").value;
+      const tbody = document.querySelector("#table-teacher-schedule tbody");
+      tbody.innerHTML = "";
 
-      const now = new Date();
-      const currentDay = now.getDay(); // 0 是週日, 1-5 是週一至週五, 6 是週六
-      const currentTimeStr = now.toTimeString().substring(0, 5); // HH:MM
+      if (!teacher) return;
 
-      // 清除舊高亮
-      document.querySelectorAll(".current-period, .active-cell").forEach(el => {
-        el.classList.remove("current-period", "active-cell");
+      scheduleTimeline.forEach(item => {
+        const tr = document.createElement("tr");
+        const tdTime = document.createElement("td");
+        tdTime.className = "time-col";
+        tdTime.innerHTML = `${item.name}<br>${item.start}~${item.end}`;
+        tr.appendChild(tdTime);
+
+        if (item.type === "activity") {
+          tr.className = "activity-row";
+          for (let day = 1; day <= 5; day++) {
+            const td = document.createElement("td");
+            td.innerHTML = item.dayDetails ? item.dayDetails[day] : item.fixedContent;
+            tr.appendChild(td);
+          }
+        } else {
+          for (let day = 0; day < 5; day++) {
+            const td = document.createElement("td");
+            let foundCourse = [];
+
+            Object.keys(systemScheduleData).forEach(cls => {
+              const courseCell = systemScheduleData[cls].schedule[item.period] ? systemScheduleData[cls].schedule[item.period][day] : "";
+              if (courseCell && courseCell.includes(teacher)) {
+                const subject = courseCell.split("<br>")[0];
+                foundCourse.push(`${cls}<br>${subject}`);
+              }
+            });
+
+            if (foundCourse.length > 0) {
+              td.innerHTML = foundCourse.join("<hr style='margin:2px 0;'>");
+              td.className = "occupied";
+            } else {
+              td.textContent = "空堂";
+              td.className = "free";
+            }
+            tr.appendChild(td);
+          }
+        }
+        tbody.appendChild(tr);
       });
+    }
 
-      let activeSlot = null;
-      for (let slot of timeSlots) {
-        if (currentTimeStr >= slot.start && currentTimeStr <= slot.end) {
-          activeSlot = slot;
+    function updateRealtimeMonitor() {
+      const now = new Date();
+      const currentDay = now.getDay();
+      const currentTimeStr = now.toTimeString().substring(0, 5);
+
+      document.getElementById("dash-time").textContent = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+
+      let activeItem = null;
+      for (let item of scheduleTimeline) {
+        if (currentTimeStr >= item.start && currentTimeStr <= item.end) {
+          activeItem = item;
           break;
         }
       }
 
-      const timeSlotDisplay = document.getElementById("current-time-slot");
-      const courseDisplay = document.getElementById("current-course");
-      const teacherDisplay = document.getElementById("current-teacher");
+      const dashPeriod = document.getElementById("dash-period");
+      const tbody = document.querySelector("#table-realtime-monitor tbody");
+      tbody.innerHTML = "";
 
-      if (currentDay >= 1 && currentDay <= 5) {
-        const dayNames = ["", "週一", "週二", "週三", "週四", "週五"];
-        
-        if (activeSlot) {
-          timeSlotDisplay.textContent = `${dayNames[currentDay]} ${activeSlot.name} (${activeSlot.start}~${activeSlot.end})`;
-          
-          // 高亮欄位
-          const activeRow = document.getElementById(`row-period-${activeSlot.period}`);
-          if (activeRow) activeRow.classList.add("current-period");
-
-          const activeCell = document.getElementById(`cell-${activeSlot.period}-${currentDay}`);
-          if (activeCell) activeCell.classList.add("active-cell");
-
-          const courseContent = scheduleData[currentClass].schedule[activeSlot.period][currentDay - 1];
-          if (courseContent && courseContent !== "-") {
-            const parts = courseContent.split("<br>");
-            courseDisplay.textContent = parts[0] || "無課程";
-            teacherDisplay.textContent = parts[1] || "-";
-          } else {
-            courseDisplay.textContent = "空堂 / 無課程";
-            teacherDisplay.textContent = "-";
-          }
-        } else {
-          timeSlotDisplay.textContent = `${dayNames[currentDay]} (非上課時段)`;
-          courseDisplay.textContent = "目前非上課時間";
-          teacherDisplay.textContent = "-";
-        }
-      } else {
-        timeSlotDisplay.textContent = "週末假期";
-        courseDisplay.textContent = "今日無課表";
-        teacherDisplay.textContent = "-";
+      if (currentDay < 1 || currentDay > 5) {
+        dashPeriod.textContent = "非課務時間 (週末)";
+        return;
       }
+
+      if (!activeItem) {
+        dashPeriod.textContent = "非上課作息時間";
+        return;
+      }
+
+      dashPeriod.textContent = `${activeItem.name} (${activeItem.start}~${activeItem.end})`;
+
+      if (activeItem.type === "activity") {
+        systemTeachersList.forEach(t => {
+          const tr = document.createElement("tr");
+          tr.appendChild(createTd(t));
+          tr.appendChild(createTd("-"));
+          tr.appendChild(createTd("-"));
+          tr.appendChild(createTd(`<span class="badge badge-warning">${activeItem.name}</span>`));
+          tbody.appendChild(tr);
+        });
+        document.getElementById("dash-active-teachers").textContent = "0 人";
+        document.getElementById("dash-free-teachers").textContent = `${systemTeachersList.length} 人`;
+        return;
+      }
+
+      let activeTeacherMap = new Map();
+      let activeTeachersCount = 0;
+
+      Object.keys(systemScheduleData).forEach(cls => {
+        const cell = systemScheduleData[cls].schedule[activeItem.period][currentDay - 1];
+        if (cell && cell !== "-") {
+          const parts = cell.split("<br>");
+          const subject = parts[0];
+          const teachers = parts[1] ? parts[1].split("/") : [];
+
+          teachers.forEach(t => {
+            const name = t.trim();
+            activeTeacherMap.set(name, { subject: subject, class: cls, status: "授課中" });
+          });
+        }
+      });
+
+      systemTeachersList.forEach(t => {
+        const tr = document.createElement("tr");
+        const tdName = document.createElement("td");
+        tdName.textContent = t;
+        tr.appendChild(tdName);
+
+        if (activeTeacherMap.has(t)) {
+          const info = activeTeacherMap.get(t);
+          tr.appendChild(createTd(info.subject));
+          tr.appendChild(createTd(info.class));
+          tr.appendChild(createTd('<span class="badge badge-info">授課中</span>'));
+          activeTeachersCount++;
+        } else {
+          tr.appendChild(createTd("-"));
+          tr.appendChild(createTd("-"));
+          tr.appendChild(createTd('<span class="badge badge-secondary">空堂備用</span>'));
+        }
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("dash-active-teachers").textContent = `${activeTeachersCount} 人`;
+      document.getElementById("dash-free-teachers").textContent = `${systemTeachersList.length - activeTeachersCount} 人`;
+    }
+
+    function createTd(htmlContent) {
+      const td = document.createElement("td");
+      td.innerHTML = htmlContent;
+      return td;
+    }
+
+    function toggleSwapMode() {
+      const type = document.getElementById("swap-type").value;
+      const targetHeader = document.getElementById("target-header");
+      const groupExchange = document.getElementById("group-exchange-only");
+      const groupTargetTeacher = document.getElementById("group-target-teacher");
+
+      if (type === "substitute") {
+        targetHeader.textContent = "代課教師設定 (乙方)";
+        groupExchange.style.display = "none";
+        groupTargetTeacher.style.display = "block";
+      } else {
+        targetHeader.textContent = "對調目標課程 (乙方)";
+        groupExchange.style.display = "block";
+        groupTargetTeacher.style.display = "none";
+      }
+    }
+
+    function updateSwapOptions() {
+      const cls = document.getElementById("swap-class").value;
+      const periodSelect1 = document.getElementById("swap-period-1");
+      const periodSelect2 = document.getElementById("swap-period-2");
+
+      periodSelect1.innerHTML = "";
+      periodSelect2.innerHTML = "";
+
+      timeSlots.forEach(s => {
+        const opt1 = document.createElement("option");
+        opt1.value = s.period;
+        opt1.textContent = `${s.name} (${s.start}~${s.end})`;
+        periodSelect1.appendChild(opt1);
+
+        const opt2 = document.createElement("option");
+        opt2.value = s.period;
+        opt2.textContent = `${s.name} (${s.start}~${s.end})`;
+        periodSelect2.appendChild(opt2);
+      });
+
+      updateSwapOriginalCourse();
+    }
+
+    function updateSwapOriginalCourse() {
+      const cls = document.getElementById("swap-class").value;
+      const day1 = document.getElementById("swap-day-1").value;
+      const period1 = document.getElementById("swap-period-1").value;
+      const infoInput = document.getElementById("swap-orig-info");
+
+      if (systemScheduleData[cls] && systemScheduleData[cls].schedule[period1]) {
+        const course = systemScheduleData[cls].schedule[period1][day1 - 1] || "-";
+        infoInput.value = course.replace("<br>", " / ");
+      } else {
+        infoInput.value = "-";
+      }
+    }
+
+    function executeSwapCourse() {
+      const type = document.getElementById("swap-type").value;
+      const cls = document.getElementById("swap-class").value;
+      const day1 = parseInt(document.getElementById("swap-day-1").value);
+      const period1 = parseInt(document.getElementById("swap-period-1").value);
+
+      if (type === "substitute") {
+        const targetTeacher = document.getElementById("swap-target-teacher").value;
+        const currentCourse = systemScheduleData[cls].schedule[period1][day1 - 1];
+
+        if (!currentCourse || currentCourse === "-") {
+          alert("該時段原無排定課程，無法設定代理代課。");
+          return;
+        }
+
+        const parts = currentCourse.split("<br>");
+        const subject = parts[0];
+        systemScheduleData[cls].schedule[period1][day1 - 1] = `${subject}<br>${targetTeacher}`;
+
+      } else {
+        const day2 = parseInt(document.getElementById("swap-day-2").value);
+        const period2 = parseInt(document.getElementById("swap-period-2").value);
+
+        const course1 = systemScheduleData[cls].schedule[period1][day1 - 1];
+        const course2 = systemScheduleData[cls].schedule[period2][day2 - 1];
+
+        systemScheduleData[cls].schedule[period1][day1 - 1] = course2;
+        systemScheduleData[cls].schedule[period2][day2 - 1] = course1;
+      }
+
+      saveScheduleData();
+      alert("課表異動更新完畢。");
+      renderClassSchedule();
+      renderTeacherSchedule();
+      updateSwapOriginalCourse();
+    }
+
+    function renderDataManagementLists() {
+      const listClasses = document.getElementById("list-classes");
+      const listTeachers = document.getElementById("list-teachers");
+
+      listClasses.innerHTML = "";
+      listTeachers.innerHTML = "";
+
+      Object.keys(systemScheduleData).forEach(c => {
+        const li = document.createElement("li");
+        li.textContent = `${c} (導師：${systemScheduleData[c].mentor})`;
+        listClasses.appendChild(li);
+      });
+
+      systemTeachersList.forEach(t => {
+        const li = document.createElement("li");
+        li.textContent = t;
+        listTeachers.appendChild(li);
+      });
+    }
+
+    function openAddClassModal() {
+      document.getElementById("modal-add-class").style.display = "flex";
+    }
+
+    function openAddTeacherModal() {
+      document.getElementById("modal-add-teacher").style.display = "flex";
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = "none";
+    }
+
+    function saveNewClass() {
+      const name = document.getElementById("modal-class-name").value.trim();
+      const mentor = document.getElementById("modal-class-mentor").value.trim();
+
+      if (!name) {
+        alert("請輸入班級名稱。");
+        return;
+      }
+
+      if (systemScheduleData[name]) {
+        alert("該班級名稱已存在。");
+        return;
+      }
+
+      let emptySchedule = {};
+      timeSlots.forEach(s => {
+        emptySchedule[s.period] = ["-", "-", "-", "-", "-"];
+      });
+
+      systemScheduleData[name] = {
+        mentor: mentor || "未指定",
+        schedule: emptySchedule
+      };
+
+      saveScheduleData();
+      closeModal("modal-add-class");
+      initUI();
+      alert(`班級 ${name} 新增完成。`);
+    }
+
+    function saveNewTeacher() {
+      const name = document.getElementById("modal-teacher-name").value.trim();
+
+      if (!name) {
+        alert("請輸入教師姓名。");
+        return;
+      }
+
+      if (systemTeachersList.includes(name)) {
+        alert("該教師姓名已存在。");
+        return;
+      }
+
+      systemTeachersList.push(name);
+      systemTeachersList.sort();
+      saveTeachersData();
+      closeModal("modal-add-teacher");
+      initUI();
+      alert(`教師 ${name} 新增完成。`);
     }
   </script>
 </body>
