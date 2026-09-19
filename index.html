@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>國立東港高級海事水產職業學校 - 教務處課表與教師調課管理系統</title>
+  <title>智慧課表｜國立東港高級海事水產職業學校</title>
   <style>
     :root {
       --primary-color: #003366;
@@ -281,16 +281,33 @@
 
     .badge-info { background-color: #17a2b8; }
     .badge-secondary { background-color: #6c757d; }
+
+    .smart-intro { color: #4a6572; margin: -0.5rem 0 0.5rem; }
+    .quick-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+    .quick-tile { border: 1px solid var(--border-color); border-left: 4px solid var(--accent-color); padding: 1rem; background: #f8fbff; border-radius: 4px; }
+    .quick-tile strong { display: block; font-size: 1.35rem; color: var(--primary-color); margin-top: .25rem; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+    .toolbar input { min-width: 220px; }
+    .hint { color: #6c757d; font-size: .85rem; margin-top: .5rem; }
+    @media print { header, .nav-tabs, .filter-bar, #panel-dashboard, #panel-teacher-schedule, #panel-swap-course, #panel-data-setting, #panel-quick-tools { display: none !important; } main { padding: 0; max-width: none; } #panel-class-schedule { display: flex !important; } .card { border: 0; box-shadow: none; } }
+
+    .record-toolbar { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin-bottom:.75rem; }
+    .record-toolbar select, .record-toolbar input { min-width:160px; }
+    .record-table { font-size:.82rem; }
+    .record-table td { text-align:left; vertical-align:top; }
+    .record-empty { text-align:center; color:#6c757d; padding:1rem; }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="system-title">國立東港高級海事水產職業學校 教務管理系統</div>
+    <div class="system-title">智慧課表｜東港海事教務處</div>
     <div class="nav-tabs">
       <button class="nav-tab active" onclick="switchTab('dashboard')">即時調度監控</button>
       <button class="nav-tab" onclick="switchTab('class-schedule')">班級課表查詢</button>
       <button class="nav-tab" onclick="switchTab('teacher-schedule')">教師動態查詢</button>
+      <button class="nav-tab" onclick="switchTab('quick-tools')">教務快捷工具</button>
+      <button class="nav-tab" onclick="switchTab('records')">紀錄中心</button>
       <button class="nav-tab" onclick="switchTab('swap-course')">代調課管理</button>
       <button class="nav-tab" onclick="switchTab('data-setting')">基本資料設定</button>
     </div>
@@ -346,6 +363,7 @@
             <label for="select-class">選擇班級：</label>
             <select id="select-class" onchange="renderClassSchedule()"></select>
           </div>
+          <div class="filter-group"><label for="class-search">快速篩選：</label><input id="class-search" type="search" placeholder="輸入班級，例如 電三" oninput="filterClassOptions()"></div>
           <div class="filter-group">
             <span id="class-mentor-info" class="badge badge-info"></span>
           </div>
@@ -464,6 +482,61 @@
         <div style="margin-top: 1rem; text-align: right;">
           <button class="btn-primary" onclick="executeSwapCourse()">執行異動更新</button>
         </div>
+      </div>
+    </div>
+
+
+    <div id="panel-quick-tools" class="view-panel">
+      <div class="card">
+        <div class="card-header">智慧課表｜教務快捷工具</div>
+        <p class="smart-intro">預設資料來自完整全校課表。系統會優先載入 33 班預設資料；如瀏覽器曾保存舊版 5 班資料，會自動改用本版完整資料。</p>
+        <div class="quick-grid">
+          <div class="quick-tile"><span>預設班級數</span><strong id="quick-class-count">0 班</strong></div>
+          <div class="quick-tile"><span>預設教師數</span><strong id="quick-teacher-count">0 人</strong></div>
+          <div class="quick-tile"><span>每班課程格數</span><strong>35 格</strong></div>
+          <div class="quick-tile"><span>課表時區</span><strong>Asia/Taipei</strong></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">快速查班與列印</div>
+        <div class="toolbar">
+          <input id="quick-class-search" type="search" placeholder="搜尋班級，例如：電三、餐三" oninput="filterQuickClassOptions()">
+          <select id="quick-class"></select>
+          <button class="btn-primary" onclick="openQuickClass()">開啟班級課表</button>
+          <button onclick="printCurrentClass()">列印目前課表</button>
+        </div>
+        <p class="hint">選擇班級後可直接開啟、列印或匯出；課表異動會保存在本機。</p>
+      </div>
+      <div class="card">
+        <div class="card-header">資料與交接</div>
+        <div class="toolbar">
+          <button class="btn-success" onclick="downloadDefaultSchedule()">下載完整預設課表 JSON</button>
+          <button onclick="downloadCurrentClassCsv()">下載目前班級 CSV</button>
+          <button class="btn-danger" onclick="resetToDefaultData()">恢復完整 33 班預設資料</button>
+        </div>
+        <p class="hint">預設課表是系統初始資料；調課與新增資料只會影響本機瀏覽器，不會改動原始預設課表。</p>
+      </div>
+    </div>
+
+
+    <div id="panel-records" class="view-panel">
+      <div class="card">
+        <div class="card-header">智慧課表｜紀錄中心</div>
+        <p class="smart-intro">調課、代課與重要操作會記錄在本機瀏覽器，方便教務處追蹤、交接與稽核。</p>
+        <div class="record-toolbar">
+          <select id="record-filter" onchange="renderRecords()"><option value="all">全部紀錄</option><option value="substitute">代課紀錄</option><option value="exchange">調課紀錄</option><option value="operation">操作紀錄</option></select>
+          <input id="record-search" type="search" placeholder="搜尋班級、教師或內容" oninput="renderRecords()">
+          <button class="btn-success" onclick="downloadRecords()">匯出紀錄 JSON</button>
+          <button class="btn-danger" onclick="clearRecords()">清除紀錄</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">調課／代課紀錄 <span id="change-record-count" class="badge badge-info">0 筆</span></div>
+        <div class="table-responsive"><table class="record-table"><thead><tr><th>時間</th><th>類型</th><th>班級</th><th>日期／節次</th><th>原課程</th><th>異動內容</th></tr></thead><tbody id="change-record-body"></tbody></table></div>
+      </div>
+      <div class="card">
+        <div class="card-header">操作紀錄 <span id="operation-record-count" class="badge badge-secondary">0 筆</span></div>
+        <div class="table-responsive"><table class="record-table"><thead><tr><th>時間</th><th>操作</th><th>詳細內容</th></tr></thead><tbody id="operation-record-body"></tbody></table></div>
       </div>
     </div>
 
@@ -2319,28 +2392,94 @@
       { period: 7, name: "第七節", start: "15:20", end: "16:10" }
     ];
 
+    const STORAGE_KEY = "smart_schedule_data_v2";
+    const TEACHER_KEY = "smart_teachers_list_v2";
+    const CHANGE_RECORD_KEY = "smart_change_records_v1";
+    const OPERATION_LOG_KEY = "smart_operation_logs_v1";
+    let changeRecords = [];
+    let operationLogs = [];
     let systemScheduleData = {};
     let systemTeachersList = [];
 
     window.onload = function() {
       loadLocalStorageData();
+      loadRecords();
+      logOperation("系統啟動", `載入完整 ${Object.keys(defaultScheduleData).length} 班預設課表`);
       initUI();
       setInterval(updateRealtimeMonitor, 5000);
       updateRealtimeMonitor();
     };
 
+    function loadRecords() {
+      try { changeRecords = JSON.parse(localStorage.getItem(CHANGE_RECORD_KEY) || "[]"); } catch (e) { changeRecords = []; }
+      try { operationLogs = JSON.parse(localStorage.getItem(OPERATION_LOG_KEY) || "[]"); } catch (e) { operationLogs = []; }
+    }
+
+    function saveRecords() {
+      localStorage.setItem(CHANGE_RECORD_KEY, JSON.stringify(changeRecords.slice(-500)));
+      localStorage.setItem(OPERATION_LOG_KEY, JSON.stringify(operationLogs.slice(-1000)));
+    }
+
+    function logOperation(action, detail) {
+      operationLogs.unshift({ id: Date.now() + Math.random(), time: new Date().toISOString(), action, detail });
+      if (operationLogs.length > 1000) operationLogs.length = 1000;
+      localStorage.setItem(OPERATION_LOG_KEY, JSON.stringify(operationLogs));
+      if (document.getElementById("operation-record-body")) renderRecords();
+    }
+
+    function addChangeRecord(record) {
+      changeRecords.unshift({ id: Date.now() + Math.random(), time: new Date().toISOString(), ...record });
+      if (changeRecords.length > 500) changeRecords.length = 500;
+      saveRecords();
+      renderRecords();
+    }
+
+    function taipeiRecordTime(iso) {
+      return new Intl.DateTimeFormat("zh-TW", { timeZone: "Asia/Taipei", dateStyle: "short", timeStyle: "medium" }).format(new Date(iso));
+    }
+
+    function renderRecords() {
+      const filter = document.getElementById("record-filter")?.value || "all";
+      const query = (document.getElementById("record-search")?.value || "").trim().toLowerCase();
+      const matches = item => !query || JSON.stringify(item).toLowerCase().includes(query);
+      const changes = changeRecords.filter(x => (filter === "all" || filter === x.type) && matches(x));
+      const operations = operationLogs.filter(x => (filter === "all" || filter === "operation") && matches(x));
+      const changeBody = document.getElementById("change-record-body");
+      const operationBody = document.getElementById("operation-record-body");
+      if (!changeBody || !operationBody) return;
+      changeBody.innerHTML = changes.length ? changes.map(x => `<tr><td>${taipeiRecordTime(x.time)}</td><td>${x.type === "substitute" ? "代課" : "調課"}</td><td>${x.className}</td><td>星期${x.day}／第${x.period}節</td><td>${x.original || "-"}</td><td>${x.detail}</td></tr>`).join("") : '<tr><td colspan="6" class="record-empty">尚無符合條件的調課／代課紀錄</td></tr>';
+      operationBody.innerHTML = operations.length ? operations.map(x => `<tr><td>${taipeiRecordTime(x.time)}</td><td>${x.action}</td><td>${x.detail}</td></tr>`).join("") : '<tr><td colspan="3" class="record-empty">尚無符合條件的操作紀錄</td></tr>';
+      document.getElementById("change-record-count").textContent = `${changes.length} 筆`;
+      document.getElementById("operation-record-count").textContent = `${operations.length} 筆`;
+    }
+
+    function downloadRecords() {
+      downloadText("智慧課表-調代課與操作紀錄.json", JSON.stringify({ exportedAt: new Date().toISOString(), changeRecords, operationLogs }, null, 2), "application/json;charset=utf-8");
+      logOperation("匯出紀錄", `匯出調課／代課 ${changeRecords.length} 筆、操作 ${operationLogs.length} 筆`);
+    }
+
+    function clearRecords() {
+      if (!confirm("確定清除所有調課、代課與操作紀錄？此動作無法復原。")) return;
+      changeRecords = []; operationLogs = []; saveRecords(); renderRecords();
+      alert("紀錄已清除。");
+    }
+
     function loadLocalStorageData() {
-      const storedSchedule = localStorage.getItem("admin_schedule_data");
-      if (storedSchedule) {
-        systemScheduleData = JSON.parse(storedSchedule);
+      const storedSchedule = localStorage.getItem(STORAGE_KEY);
+      let parsed = null;
+      try { parsed = storedSchedule ? JSON.parse(storedSchedule) : null; } catch (e) { parsed = null; }
+      const defaultClassCount = Object.keys(defaultScheduleData).length;
+      const hasCompleteDefaults = parsed && Object.keys(parsed).length >= defaultClassCount && parsed["餐三甲"];
+      if (hasCompleteDefaults) {
+        systemScheduleData = parsed;
       } else {
         systemScheduleData = JSON.parse(JSON.stringify(defaultScheduleData));
-        localStorage.setItem("admin_schedule_data", JSON.stringify(systemScheduleData));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(systemScheduleData));
       }
 
-      const storedTeachers = localStorage.getItem("admin_teachers_list");
+      const storedTeachers = localStorage.getItem(TEACHER_KEY);
       if (storedTeachers) {
-        systemTeachersList = JSON.parse(storedTeachers);
+        try { systemTeachersList = JSON.parse(storedTeachers); } catch (e) { extractAndSaveTeachers(); }
       } else {
         extractAndSaveTeachers();
       }
@@ -2364,34 +2503,111 @@
         });
       });
       systemTeachersList = Array.from(teacherSet).sort();
-      localStorage.setItem("admin_teachers_list", JSON.stringify(systemTeachersList));
+      localStorage.setItem(TEACHER_KEY, JSON.stringify(systemTeachersList));
     }
 
     function saveScheduleData() {
-      localStorage.setItem("admin_schedule_data", JSON.stringify(systemScheduleData));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(systemScheduleData));
     }
 
     function saveTeachersData() {
-      localStorage.setItem("admin_teachers_list", JSON.stringify(systemTeachersList));
+      localStorage.setItem(TEACHER_KEY, JSON.stringify(systemTeachersList));
     }
 
     function resetToDefaultData() {
       if (confirm("確認恢復為系統初始預設的115學年度上學期課表資料？自訂資料將會被覆蓋。")) {
         systemScheduleData = JSON.parse(JSON.stringify(defaultScheduleData));
-        localStorage.setItem("admin_schedule_data", JSON.stringify(systemScheduleData));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(systemScheduleData));
         extractAndSaveTeachers();
+        logOperation("恢復預設資料", `恢復完整 ${Object.keys(defaultScheduleData).length} 班預設課表`);
         initUI();
-        alert("資料已重置為預設課表。");
+        alert("資料已重置為完整預設課表。");
       }
     }
 
     function initUI() {
       populateClassDropdowns();
       populateTeacherDropdowns();
+      syncQuickTools();
       renderClassSchedule();
       renderTeacherSchedule();
       updateSwapOptions();
       renderDataManagementLists();
+      renderRecords();
+    }
+
+    function syncQuickTools() {
+      const count = Object.keys(systemScheduleData).length;
+      const classCount = document.getElementById("quick-class-count");
+      const teacherCount = document.getElementById("quick-teacher-count");
+      if (classCount) classCount.textContent = `${count} 班`;
+      if (teacherCount) teacherCount.textContent = `${systemTeachersList.length} 人`;
+      const select = document.getElementById("quick-class");
+      if (!select) return;
+      const current = select.value;
+      select.innerHTML = "";
+      Object.keys(systemScheduleData).forEach(cls => {
+        const option = document.createElement("option"); option.value = cls; option.textContent = cls; select.appendChild(option);
+      });
+      if (systemScheduleData[current]) select.value = current;
+    }
+
+    function filterQuickClassOptions() {
+      const query = (document.getElementById("quick-class-search").value || "").trim();
+      const select = document.getElementById("quick-class");
+      select.innerHTML = "";
+      Object.keys(systemScheduleData).filter(cls => cls.includes(query)).forEach(cls => {
+        const option = document.createElement("option"); option.value = cls; option.textContent = cls; select.appendChild(option);
+      });
+    }
+
+    function filterClassOptions() {
+      const query = (document.getElementById("class-search").value || "").trim();
+      const select = document.getElementById("select-class");
+      const current = select.value;
+      select.innerHTML = "";
+      Object.keys(systemScheduleData).filter(cls => cls.includes(query)).forEach(cls => {
+        const option = document.createElement("option"); option.value = cls; option.textContent = cls; select.appendChild(option);
+      });
+      if (systemScheduleData[current]) select.value = current;
+      renderClassSchedule();
+    }
+
+    function openQuickClass() {
+      const cls = document.getElementById("quick-class").value;
+      if (!cls) return;
+      document.getElementById("select-class").value = cls;
+      renderClassSchedule();
+      switchTabById("class-schedule");
+    }
+
+    function switchTabById(tabId) {
+      document.querySelectorAll(".nav-tab").forEach(tab => tab.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(panel => panel.classList.remove("active"));
+      document.getElementById(`panel-${tabId}`).classList.add("active");
+    }
+
+    function printCurrentClass() {
+      const cls = document.getElementById("quick-class").value || document.getElementById("select-class").value;
+      if (cls) { document.getElementById("select-class").value = cls; renderClassSchedule(); switchTabById("class-schedule"); }
+      setTimeout(() => window.print(), 150);
+    }
+
+    function downloadText(filename, text, type) {
+      const blob = new Blob([text], { type }); const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
+    }
+
+    function downloadDefaultSchedule() {
+      downloadText("智慧課表-完整33班預設課表.json", JSON.stringify(defaultScheduleData, null, 2), "application/json;charset=utf-8");
+    }
+
+    function downloadCurrentClassCsv() {
+      const cls = document.getElementById("quick-class").value || document.getElementById("select-class").value;
+      if (!cls || !systemScheduleData[cls]) return;
+      const rows = [["節次/時間", "星期一", "星期二", "星期三", "星期四", "星期五"]];
+      timeSlots.forEach(slot => rows.push([`${slot.name} ${slot.start}-${slot.end}`, ...(systemScheduleData[cls].schedule[slot.period] || []).map(x => x.replace(/<br>/g, " / "))]));
+      downloadText(`智慧課表-${cls}.csv`, "\ufeff" + rows.map(row => row.map(x => `"${String(x).replace(/"/g, '""')}"`).join(",")).join("\n"), "text/csv;charset=utf-8");
     }
 
     function switchTab(tabId) {
@@ -2508,12 +2724,18 @@
       });
     }
 
+    function getTaipeiParts(date = new Date()) {
+      const parts = new Intl.DateTimeFormat("zh-TW", { timeZone: "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit", weekday: "short", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).formatToParts(date);
+      return Object.fromEntries(parts.filter(p => p.type !== "literal").map(p => [p.type, p.value]));
+    }
+
     function updateRealtimeMonitor() {
       const now = new Date();
-      const currentDay = now.getDay();
-      const currentTimeStr = now.toTimeString().substring(0, 5);
+      const tp = getTaipeiParts(now);
+      const currentDay = ["日", "一", "二", "三", "四", "五", "六"].indexOf(tp.weekday.replace("週", ""));
+      const currentTimeStr = `${tp.hour}:${tp.minute}`;
 
-      document.getElementById("dash-time").textContent = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+      document.getElementById("dash-time").textContent = `${tp.year}-${tp.month}-${tp.day} ${tp.hour}:${tp.minute}:${tp.second}（台北時間）`;
 
       let activeSlot = null;
       for (let slot of timeSlots) {
@@ -2645,36 +2867,29 @@
       const cls = document.getElementById("swap-class").value;
       const day1 = parseInt(document.getElementById("swap-day-1").value);
       const period1 = parseInt(document.getElementById("swap-period-1").value);
+      const dayName = ["一", "二", "三", "四", "五"][day1 - 1];
+      const original = systemScheduleData[cls].schedule[period1][day1 - 1];
+      if (!original || original === "-") { alert("該時段原無排定課程，無法設定異動。"); return; }
 
       if (type === "substitute") {
         const targetTeacher = document.getElementById("swap-target-teacher").value;
-        const currentCourse = systemScheduleData[cls].schedule[period1][day1 - 1];
-
-        if (!currentCourse || currentCourse === "-") {
-          alert("該時段原無排定課程，無法設定代理代課。");
-          return;
-        }
-
-        const parts = currentCourse.split("<br>");
-        const subject = parts[0];
+        const subject = original.split("<br>")[0];
         systemScheduleData[cls].schedule[period1][day1 - 1] = `${subject}<br>${targetTeacher}`;
-
+        addChangeRecord({ type: "substitute", className: cls, day: dayName, period: period1, original: original.replace("<br>", " / "), detail: `${subject} → 代課教師：${targetTeacher}` });
+        logOperation("登記代課", `${cls} 星期${dayName} 第${period1}節，${subject} 由 ${targetTeacher} 代課`);
       } else {
         const day2 = parseInt(document.getElementById("swap-day-2").value);
         const period2 = parseInt(document.getElementById("swap-period-2").value);
-
-        const course1 = systemScheduleData[cls].schedule[period1][day1 - 1];
         const course2 = systemScheduleData[cls].schedule[period2][day2 - 1];
-
         systemScheduleData[cls].schedule[period1][day1 - 1] = course2;
-        systemScheduleData[cls].schedule[period2][day2 - 1] = course1;
+        systemScheduleData[cls].schedule[period2][day2 - 1] = original;
+        const dayName2 = ["一", "二", "三", "四", "五"][day2 - 1];
+        addChangeRecord({ type: "exchange", className: cls, day: dayName, period: period1, original: original.replace("<br>", " / "), detail: `與星期${dayName2}第${period2}節對調：${course2.replace("<br", " / <br")}` });
+        logOperation("登記調課", `${cls} 星期${dayName}第${period1}節 ↔ 星期${dayName2}第${period2}節`);
       }
-
       saveScheduleData();
-      alert("課表異動更新完畢。");
-      renderClassSchedule();
-      renderTeacherSchedule();
-      updateSwapOriginalCourse();
+      alert("課表異動更新完畢，紀錄已保存。");
+      renderClassSchedule(); renderTeacherSchedule(); updateSwapOriginalCourse();
     }
 
     function renderDataManagementLists() {
@@ -2734,6 +2949,7 @@
       };
 
       saveScheduleData();
+      logOperation("新增班級", `新增班級 ${name}，導師：${mentor || "未指定"}`);
       closeModal("modal-add-class");
       initUI();
       alert(`班級 ${name} 新增完成。`);
@@ -2755,6 +2971,7 @@
       systemTeachersList.push(name);
       systemTeachersList.sort();
       saveTeachersData();
+      logOperation("新增教師", `新增教師 ${name}`);
       closeModal("modal-add-teacher");
       initUI();
       alert(`教師 ${name} 新增完成。`);
