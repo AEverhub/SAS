@@ -3,148 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智慧課表 - 教務處即時管理系統</title>
+    <title>智慧課表</title>
     <style>
         :root {
-            --primary-color: #0056b3;
-            --primary-dark: #003d80;
-            --secondary-color: #e9ecef;
-            --border-color: #dee2e6;
-            --text-color: #212529;
-            --card-bg: #ffffff;
-            --accent-bg: #f8f9fa;
-            --active-color: #fff3cd;
-            --highlight-text: #856404;
+            --gov-navy: #1a2b4c;
+            --gov-slate: #2c3e50;
+            --gov-border: #b2bec3;
+            --gov-bg: #f5f6fa;
+            --gov-card: #ffffff;
+            --gov-accent: #2980b9;
+            --gov-active: #d63031;
+            --gov-highlight: #fff3bf;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: #f4f6f9; color: var(--text-color); padding: 15px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; }
+        body { background-color: var(--gov-bg); color: #2d3436; padding: 20px; line-height: 1.5; }
 
-        header { text-align: center; margin-bottom: 15px; }
-        h1 { color: var(--primary-color); font-size: 1.8rem; margin-bottom: 5px; }
-        .subtitle { font-size: 0.95rem; color: #6c757d; }
-
-        /* 即時狀態卡片 */
-        .status-card {
-            background: linear-gradient(135deg, #0056b3, #003d80);
-            color: white; padding: 12px 20px; border-radius: 10px;
-            margin: 0 auto 15px auto; max-width: 1000px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); flex-wrap: wrap; gap: 10px;
+        header {
+            background-color: var(--gov-navy);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            border-bottom: 4px solid var(--gov-accent);
         }
-        .status-time { font-size: 1.3rem; font-weight: bold; }
-        .status-current { font-size: 1rem; background: rgba(255, 255, 255, 0.2); padding: 5px 12px; border-radius: 15px; }
 
-        /* 教務功能頁籤導覽 */
-        .nav-tabs { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; flex-wrap: wrap; }
+        h1 { font-size: 1.5rem; letter-spacing: 1px; font-weight: 700; }
+        .system-time { font-size: 1rem; font-family: "Courier New", monospace; text-align: right; background: rgba(0,0,0,0.2); padding: 5px 12px; border-radius: 3px; }
+
+        /* 導覽頁籤 */
+        .nav-tabs { display: flex; gap: 2px; border-bottom: 2px solid var(--gov-slate); margin-bottom: 20px; }
         .tab-btn {
-            padding: 10px 18px; border: 1px solid var(--border-color); background-color: #fff;
-            border-radius: 6px; cursor: pointer; font-weight: bold; color: var(--primary-color); transition: 0.2s;
+            padding: 8px 20px; background-color: #dfe6e9; border: none; font-weight: bold;
+            color: var(--gov-slate); cursor: pointer; border-radius: 4px 4px 0 0; transition: 0.1s;
         }
-        .tab-btn.active { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .tab-btn.active { background-color: var(--gov-slate); color: white; }
 
-        .tab-content { display: none; max-width: 1000px; margin: 0 auto; }
+        .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        .panel-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .panel-card h3 { color: var(--primary-color); margin-bottom: 15px; border-bottom: 2px solid var(--secondary-color); padding-bottom: 8px; }
+        .panel-card {
+            background: var(--gov-card); border: 1px solid var(--gov-border);
+            border-radius: 4px; padding: 20px; margin-bottom: 20px;
+        }
+        .panel-title { font-size: 1.1rem; color: var(--gov-navy); font-weight: bold; border-left: 4px solid var(--gov-navy); padding-left: 10px; margin-bottom: 15px; }
 
-        /* 表單元素 */
-        .form-group { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
-        .form-group label { width: 100px; font-weight: bold; }
-        select, input, button { padding: 8px 12px; font-size: 0.95rem; border: 1px solid #ced4da; border-radius: 6px; outline: none; }
-        button.btn-primary { background-color: var(--primary-color); color: white; border: none; cursor: pointer; }
-        button.btn-primary:hover { background-color: var(--primary-dark); }
+        /* 表單區域 */
+        .form-row { display: flex; gap: 15px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+        .form-row label { font-weight: bold; width: 90px; font-size: 0.9rem; }
+        select, input, button {
+            padding: 6px 12px; font-size: 0.9rem; border: 1px solid var(--gov-border); border-radius: 2px; outline: none;
+        }
+        button.btn-gov {
+            background-color: var(--gov-navy); color: white; border: none; cursor: pointer; font-weight: bold; padding: 8px 16px;
+        }
+        button.btn-gov:hover { background-color: var(--gov-slate); }
+        button.btn-export { background-color: #27ae60; color: white; border: none; cursor: pointer; font-weight: bold; }
 
-        /* 表格與高亮 */
-        .class-info { background-color: var(--primary-color); color: white; padding: 12px 20px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; font-weight: bold; }
-        .table-container { background-color: var(--card-bg); border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; text-align: center; min-width: 650px; }
-        th, td { border: 1px solid var(--border-color); padding: 10px 8px; font-size: 0.9rem; }
-        th { background-color: var(--secondary-color); color: #495057; }
-        td.period { background-color: var(--accent-bg); font-weight: bold; width: 140px; }
-        .time-badge { display: block; font-size: 0.75rem; color: #6c757d; font-weight: normal; }
-        
-        .active-row { background-color: var(--active-color) !important; }
-        .active-cell { background-color: #ffe8a1 !important; font-weight: bold; color: #856404; border: 2px solid #ffe066 !important; }
-        .active-tag { display: inline-block; background-color: #d39e00; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
+        /* 表格樣式 */
+        .table-container { overflow-x: auto; border: 1px solid var(--gov-border); background: white; }
+        table { width: 100%; border-collapse: collapse; text-align: center; min-width: 700px; font-size: 0.9rem; }
+        th, td { border: 1px solid var(--gov-border); padding: 10px; }
+        th { background-color: #f1f2f6; color: var(--gov-navy); font-weight: bold; }
+        td.period-col { background-color: #f8f9fa; font-weight: bold; width: 160px; }
+        .time-text { font-size: 0.75rem; color: #636e72; font-weight: normal; display: block; }
 
-        /* 調課紀錄列表 */
-        .log-list { list-style: none; max-height: 250px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; background: #fafafa; }
-        .log-item { padding: 8px 0; border-bottom: 1px dashed #ccc; font-size: 0.9rem; }
-        .log-item:last-child { border-bottom: none; }
-        .log-time { color: #6c757d; font-size: 0.8rem; }
+        /* 當前上課高亮 */
+        .active-period { background-color: var(--gov-highlight) !important; font-weight: bold; }
+        .active-tag { background-color: var(--gov-active); color: white; font-size: 0.7rem; padding: 1px 4px; border-radius: 2px; margin-left: 4px; }
 
-        @media (max-width: 767px) { .desktop-table { display: none; } }
+        /* 文字日誌區塊 */
+        .log-box {
+            width: 100%; height: 200px; background-color: #2d3436; color: #76ff03;
+            font-family: "Courier New", monospace; padding: 10px; border-radius: 2px;
+            overflow-y: scroll; font-size: 0.85rem; white-space: pre-wrap;
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>智慧課表管理系統</h1>
-        <div class="subtitle">國立東港海事 - 教務處控制台</div>
+        <div>
+            <h1>國立東港海事 - 教務處調課與課表管理系統</h1>
+        </div>
+        <div class="system-time">
+            <div>國家標準時間 (UTC+8)</div>
+            <div id="taipeiClock" style="font-size: 1.2rem; font-weight: bold; color: #00cec9;">0000-00-00 00:00:00</div>
+        </div>
     </header>
 
-    <!-- 即時時鐘與動態卡片 -->
-    <div class="status-card">
-        <div class="status-time" id="clock">12:00:00</div>
-        <div class="status-current" id="currentPeriodText">讀取中...</div>
-    </div>
-
-    <!-- 頁籤選單 -->
+    <!-- 頁籤導覽 -->
     <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('viewTab')">課表即時查詢</button>
-        <button class="tab-btn" onclick="switchTab('swapTab')">教務調課設定</button>
-        <button class="tab-btn" onclick="switchTab('classTab')">新建/修改班級</button>
-        <button class="tab-btn" onclick="switchTab('settingsTab')">作息修改/調課紀錄</button>
+        <button class="tab-btn active" onclick="switchTab('viewTab')">班級總課表</button>
+        <button class="tab-btn" onclick="switchTab('swapTab')">線上調課申請</button>
+        <button class="tab-btn" onclick="switchTab('classTab')">班級維護</button>
+        <button class="tab-btn" onclick="switchTab('logTab')">調課日誌與備份</button>
     </div>
 
-    <!-- TAB 1: 課表即時查詢 -->
+    <!-- TAB 1: 課表查詢 -->
     <div id="viewTab" class="tab-content active">
-        <div class="panel-card" style="padding: 10px; text-align: center;">
-            <select id="classSelect" onchange="renderSchedule()"></select>
-            <input type="text" id="searchInput" placeholder="搜尋班級或導師..." oninput="filterClasses()">
+        <div class="panel-card" style="padding: 12px;">
+            <div class="form-row" style="margin:0;">
+                <label>選擇班級：</label>
+                <select id="classSelect" onchange="renderSchedule()"></select>
+                <input type="text" id="searchInput" placeholder="關鍵字搜尋..." oninput="filterClasses()">
+            </div>
         </div>
 
-        <div class="table-container">
-            <div class="class-info">
+        <div class="panel-card" style="padding: 0;">
+            <div style="background: var(--gov-slate); color: white; padding: 10px 15px; font-weight: bold; display: flex; justify-content: space-between;">
                 <span id="currentClassName">班級名稱</span>
                 <span id="currentTutor">導師：-</span>
             </div>
-            <table class="desktop-table">
-                <thead>
-                    <tr>
-                        <th>節次 / 時間</th>
-                        <th>星期一</th>
-                        <th>星期二</th>
-                        <th>星期三</th>
-                        <th>星期四</th>
-                        <th>星期五</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>節次 / 時間</th>
+                            <th>星期一</th>
+                            <th>星期二</th>
+                            <th>星期三</th>
+                            <th>星期四</th>
+                            <th>星期五</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <!-- TAB 2: 教務調課設定 -->
+    <!-- TAB 2: 調課申請 -->
     <div id="swapTab" class="tab-content">
         <div class="panel-card">
-            <h3>教務處線上調課單</h3>
-            <p style="color: #6c757d; margin-bottom: 15px; font-size: 0.9rem;">請選擇要進行課程對調的兩個班級、星期與節次：</p>
-            
-            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                <!-- 課程 A -->
-                <div style="flex: 1; min-width: 280px; background: #f8f9fa; padding: 15px; border-radius: 6px;">
-                    <h4 style="color: var(--primary-color); margin-bottom: 10px;">課程 A</h4>
-                    <div class="form-group"><label>班級：</label><select id="swapClassA"></select></div>
-                    <div class="form-group"><label>星期：</label>
+            <div class="panel-title">教務處課務對調執行作業</div>
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
+                <!-- 標的 A -->
+                <div style="flex: 1; border: 1px solid var(--gov-border); padding: 15px; background: #fafafa;">
+                    <strong style="color: var(--gov-navy);">【標的 A】</strong>
+                    <div class="form-row" style="margin-top:10px;"><label>班級：</label><select id="swapClassA"></select></div>
+                    <div class="form-row"><label>星期：</label>
                         <select id="swapDayA">
                             <option value="0">星期一</option><option value="1">星期二</option>
                             <option value="2">星期三</option><option value="3">星期四</option><option value="4">星期五</option>
                         </select>
                     </div>
-                    <div class="form-group"><label>節次：</label>
+                    <div class="form-row"><label>節次：</label>
                         <select id="swapPeriodA">
                             <option value="1">第 1 節</option><option value="2">第 2 節</option><option value="3">第 3 節</option>
                             <option value="4">第 4 節</option><option value="5">第 5 節</option><option value="6">第 6 節</option><option value="7">第 7 節</option>
@@ -152,17 +160,17 @@
                     </div>
                 </div>
 
-                <!-- 課程 B -->
-                <div style="flex: 1; min-width: 280px; background: #f8f9fa; padding: 15px; border-radius: 6px;">
-                    <h4 style="color: var(--primary-color); margin-bottom: 10px;">課程 B</h4>
-                    <div class="form-group"><label>班級：</label><select id="swapClassB"></select></div>
-                    <div class="form-group"><label>星期：</label>
+                <!-- 標的 B -->
+                <div style="flex: 1; border: 1px solid var(--gov-border); padding: 15px; background: #fafafa;">
+                    <strong style="color: var(--gov-navy);">【標的 B】</strong>
+                    <div class="form-row" style="margin-top:10px;"><label>班級：</label><select id="swapClassB"></select></div>
+                    <div class="form-row"><label>星期：</label>
                         <select id="swapDayB">
                             <option value="0">星期一</option><option value="1">星期二</option>
                             <option value="2">星期三</option><option value="3">星期四</option><option value="4">星期五</option>
                         </select>
                     </div>
-                    <div class="form-group"><label>節次：</label>
+                    <div class="form-row"><label>節次：</label>
                         <select id="swapPeriodB">
                             <option value="1">第 1 節</option><option value="2">第 2 節</option><option value="3">第 3 節</option>
                             <option value="4">第 4 節</option><option value="5">第 5 節</option><option value="6">第 6 節</option><option value="7">第 7 節</option>
@@ -171,51 +179,84 @@
                 </div>
             </div>
 
-            <div class="form-group" style="margin-top: 15px;">
+            <div class="form-row">
                 <label>調課事由：</label>
-                <input type="text" id="swapReason" placeholder="例如：教師公差調課 / 研習需求" style="flex: 1;">
+                <input type="text" id="swapReason" placeholder="請輸入簽核事由（如：教師公差）" style="flex:1;">
             </div>
-            <button class="btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;" onclick="handleSwapSubmit()">確認執行調課</button>
+            <button class="btn-gov" style="width: 100%; margin-top: 10px;" onclick="handleSwapSubmit()">執行調課登記</button>
         </div>
     </div>
 
-    <!-- TAB 3: 新建/修改班級課表 -->
+    <!-- TAB 3: 班級維護 -->
     <div id="classTab" class="tab-content">
         <div class="panel-card">
-            <h3>班級基本設定</h3>
-            <div class="form-group">
-                <label>班級名稱：</label>
-                <input type="text" id="newClassName" placeholder="例如：水三甲">
+            <div class="panel-title">全校班級資料建置</div>
+            <div class="form-row">
+                <label>班級代號：</label>
+                <input type="text" id="newClassName" placeholder="如：電一甲">
             </div>
-            <div class="form-group">
+            <div class="form-row">
                 <label>導師姓名：</label>
-                <input type="text" id="newTutorName" placeholder="例如：王小明">
+                <input type="text" id="newTutorName" placeholder="如：李怡蓉">
             </div>
-            <button class="btn-primary" onclick="handleClassSubmit()">新增 / 更新班級基本資料</button>
+            <button class="btn-gov" onclick="handleClassSubmit()">確認儲存</button>
         </div>
     </div>
 
-    <!-- TAB 4: 作息修改與歷史紀錄 -->
-    <div id="settingsTab" class="tab-content">
+    <!-- TAB 4: 日誌與備份 -->
+    <div id="logTab" class="tab-content">
         <div class="panel-card">
-            <h3>教務調課歷史紀錄</h3>
-            <ul class="log-list" id="logListContainer">
-                <!-- 動態繪製調課紀錄 -->
-            </ul>
-        </div>
-
-        <div class="panel-card">
-            <h3>作息時間維護 (東港海事作息)[span_1](start_span)[span_1](end_span)</h3>
-            <div id="timeScheduleEditor">
-                <!-- 動態繪製作息時間編輯器 -->
+            <div class="panel-title" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>調課紀錄稽核日誌 (Audit Log)</span>
+                <button class="btn-export" onclick="exportLogFile()">匯出文字日誌 (.txt)</button>
             </div>
+            <div class="log-box" id="logBox">無紀錄</div>
         </div>
     </div>
 
     <script src="curriculum.js"></script>
     <script>
+        // HTML 內建預設定義 - 東港海事學生生活作息時間表[span_2](start_span)[span_2](end_span)
+        const timeSchedule = [
+            { type: 'event', name: '自主學習/升旗', start: '07:50', end: '08:10' },
+            { type: 'period', period: 1, name: '第一節', start: '08:10', end: '09:00' },
+            { type: 'period', period: 2, name: '第二節', start: '09:10', end: '10:00' },
+            { type: 'period', period: 3, name: '第三節', start: '10:10', end: '11:00' },
+            { type: 'period', period: 4, name: '第四節', start: '11:10', end: '12:00' },
+            { type: 'event', name: '午餐時間', start: '12:00', end: '12:25' },
+            { type: 'event', name: '整理環境', start: '12:25', end: '12:45' },
+            { type: 'event', name: '午休時間', start: '12:45', end: '13:15' },
+            { type: 'period', period: 5, name: '第五節', start: '13:20', end: '14:10' },
+            { type: 'period', period: 6, name: '第六節', start: '14:20', end: '15:10' },
+            { type: 'period', period: 7, name: '第七節', start: '15:20', end: '16:10' }
+        ];
+
         let currentDayIdx = new Date().getDay() - 1;
         let currentPeriodObj = null;
+
+        // 國家標準時間 (台北標準時間) 時鐘機制
+        function updateClock() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const date = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            document.getElementById("taipeiClock").textContent = `${year}-${month}-${date} ${hours}:${minutes}:${seconds}`;
+
+            const currentTime = `${hours}:${minutes}`;
+            currentPeriodObj = null;
+
+            for (let item of timeSchedule) {
+                if (currentTime >= item.start && currentTime < item.end) {
+                    currentPeriodObj = item;
+                    break;
+                }
+            }
+            renderSchedule();
+        }
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -223,28 +264,8 @@
             
             event.target.classList.add('active');
             document.getElementById(tabId).classList.add('active');
-            
-            if (tabId === 'settingsTab') renderLogsAndTimeEditor();
-        }
 
-        // 時鐘與即時進行課程高亮
-        function updateClock() {
-            const now = new Date();
-            document.getElementById("clock").textContent = `系統時間：${now.toTimeString().split(' ')[0]}`;
-
-            const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-            currentPeriodObj = null;
-            let statusText = "非作息時間 / 放學";
-
-            for (let item of timeSchedule) {
-                if (currentTime >= item.start && currentTime < item.end) {
-                    currentPeriodObj = item;
-                    statusText = (item.type === 'period') ? `目前：第 ${item.period} 節 (${item.start}~${item.end})` : `目前：${item.name} (${item.start}~${item.end})`;
-                    break;
-                }
-            }
-            document.getElementById("currentPeriodText").textContent = statusText;
-            renderSchedule();
+            if (tabId === 'logTab') renderLogBox();
         }
 
         function populateSelects() {
@@ -266,29 +287,27 @@
             const data = scheduleData[className];
             if (!data) return;
 
-            document.getElementById("currentClassName").textContent = className;
+            document.getElementById("currentClassName").textContent = `班級：${className}`;
             document.getElementById("currentTutor").textContent = `導師：${data.tutor}`;
 
             const tableBody = document.getElementById("tableBody");
             tableBody.innerHTML = "";
 
-            // 結合作息時間表與課表繪製[span_2](start_span)[span_2](end_span)
             timeSchedule.forEach((item) => {
                 let tr = document.createElement("tr");
                 let isCurrentPeriod = (currentPeriodObj && currentPeriodObj.name === item.name);
-                if (isCurrentPeriod) tr.className = "active-row";
 
                 let tdPeriod = document.createElement("td");
-                tdPeriod.className = "period";
-                let periodTitle = item.type === 'period' ? `第 ${item.period} 節` : item.name;
-                tdPeriod.innerHTML = `${periodTitle} ${isCurrentPeriod ? '<span class="active-tag">進行中</span>' : ''}<span class="time-badge">${item.start} ~ ${item.end}</span>`;
+                tdPeriod.className = "period-col";
+                let titleText = item.type === 'period' ? `第 ${item.period} 節` : item.name;
+                tdPeriod.innerHTML = `${titleText} ${isCurrentPeriod ? '<span class="active-tag">進行中</span>' : ''}<span class="time-text">${item.start} - ${item.end}</span>`;
                 tr.appendChild(tdPeriod);
 
                 if (item.type === 'event') {
                     let tdEvent = document.createElement("td");
                     tdEvent.colSpan = 5;
                     tdEvent.textContent = item.name;
-                    tdEvent.style.color = "#6c757d";
+                    tdEvent.style.color = "#a4b0be";
                     tr.appendChild(tdEvent);
                 } else {
                     for (let day = 0; day < 5; day++) {
@@ -297,8 +316,7 @@
                         td.textContent = subject;
 
                         if (isCurrentPeriod && day === currentDayIdx) {
-                            td.className = "active-cell";
-                            td.innerHTML = `${subject} <br><span class="active-tag">上課中</span>`;
+                            td.className = "active-period";
                         }
                         tr.appendChild(td);
                     }
@@ -307,7 +325,6 @@
             });
         }
 
-        // 調課提交
         function handleSwapSubmit() {
             const classA = document.getElementById("swapClassA").value;
             const dayA = parseInt(document.getElementById("swapDayA").value);
@@ -317,62 +334,65 @@
             const dayB = parseInt(document.getElementById("swapDayB").value);
             const periodB = parseInt(document.getElementById("swapPeriodB").value);
 
-            const reason = document.getElementById("swapReason").value || "教務處調課";
+            const reason = document.getElementById("swapReason").value;
 
             if (swapLessons(classA, dayA, periodA, classB, dayB, periodB, reason)) {
-                alert("調課成功！已記錄至調課日誌中。");
+                alert("【成功】對調作業執行完畢，已寫入系統日誌。");
                 renderSchedule();
-            } else {
-                alert("調課失敗，請檢查輸入欄位。");
             }
         }
 
-        // 班級新建/修改
         function handleClassSubmit() {
             const name = document.getElementById("newClassName").value.trim();
             const tutor = document.getElementById("newTutorName").value.trim();
-            if (!name || !tutor) { alert("請填寫班級名稱與導師姓名"); return; }
+            if (!name || !tutor) { alert("請完整填寫欄位"); return; }
 
             addOrUpdateClass(name, tutor);
             populateSelects();
-            alert(`班級 [${name}] 設定成功！`);
+            alert(`【完成】班級 [${name}] 設定完畢。`);
         }
 
-        // 渲染調課日誌與作息時間表編輯器
-        function renderLogsAndTimeEditor() {
-            // 1. 調課日誌
-            const logContainer = document.getElementById("logListContainer");
-            logContainer.innerHTML = swapLogs.length === 0 ? "<li class='log-item'>尚無調課紀錄</li>" : "";
-            swapLogs.forEach(log => {
-                let li = document.createElement("li");
-                li.className = "log-item";
-                li.innerHTML = `<div><strong>${log.detail}</strong></div><div class="log-time">事由：${log.reason} | 時間：${log.timestamp}</div>`;
-                logContainer.appendChild(li);
-            });
+        function renderLogBox() {
+            const logBox = document.getElementById("logBox");
+            if (swapLogs.length === 0) {
+                logBox.textContent = "[SYSTEM LOG] 尚無任何調課變更紀錄。";
+                return;
+            }
 
-            // 2. 作息編輯
-            const timeContainer = document.getElementById("timeScheduleEditor");
-            timeContainer.innerHTML = "";
-            timeSchedule.forEach((item, idx) => {
-                let div = document.createElement("div");
-                div.className = "form-group";
-                let name = item.type === 'period' ? `第 ${item.period} 節` : item.name;
-                div.innerHTML = `
-                    <label>${name}：</label>
-                    <input type="time" value="${item.start}" id="start_${idx}"> ~
-                    <input type="time" value="${item.end}" id="end_${idx}">
-                    <button class="btn-primary" style="padding: 4px 10px;" onclick="saveTimeItem(${idx})">儲存</button>
-                `;
-                timeContainer.appendChild(div);
+            let text = "=== 國立東港海事 教務處調課變更日誌 ===\n\n";
+            swapLogs.forEach((log, index) => {
+                text += `[紀錄 #${swapLogs.length - index}] ${log.timestamp}\n`;
+                text += `  對調細節: ${log.detail}\n`;
+                text += `  核准事由: ${log.reason}\n`;
+                text += `--------------------------------------------------\n`;
             });
+            logBox.textContent = text;
         }
 
-        function saveTimeItem(idx) {
-            const newStart = document.getElementById(`start_${idx}`).value;
-            const newEnd = document.getElementById(`end_${idx}`).value;
-            updateTimeSchedule(idx, newStart, newEnd);
-            alert("作息時間已更新！");
-            updateClock();
+        // 匯出 TXT 文字檔案
+        function exportLogFile() {
+            if (swapLogs.length === 0) {
+                alert("目前無可供匯出的日誌紀錄。");
+                return;
+            }
+
+            let fileContent = "國立東港海事 教務處調課變更紀錄表\n";
+            fileContent += "匯出時間: " + document.getElementById("taipeiClock").textContent + "\n";
+            fileContent += "==================================================\n\n";
+
+            swapLogs.forEach((log, index) => {
+                fileContent += `紀錄編號: #${swapLogs.length - index}\n`;
+                fileContent += `異動時間: ${log.timestamp}\n`;
+                fileContent += `異動內容: ${log.detail}\n`;
+                fileContent += `事由說明: ${log.reason}\n`;
+                fileContent += "--------------------------------------------------\n";
+            });
+
+            const blob = new Blob([fileContent], { type: "text/plain;charset=utf-8" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `調課日誌_${new Date().toISOString().slice(0,10)}.txt`;
+            link.click();
         }
 
         function filterClasses() {
@@ -386,7 +406,7 @@
         window.onload = function() {
             populateSelects();
             updateClock();
-            setInterval(updateClock, 10000);
+            setInterval(updateClock, 1000); // 每一秒更新一次台北標準時間
         };
     </script>
 </body>
