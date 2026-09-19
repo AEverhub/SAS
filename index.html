@@ -296,6 +296,10 @@
     .record-table { font-size:.82rem; }
     .record-table td { text-align:left; vertical-align:top; }
     .record-empty { text-align:center; color:#6c757d; padding:1rem; }
+
+    .editor-table input { width:100%; min-width:110px; margin:2px 0; font-size:.82rem; }
+    .editor-table td { min-width:150px; vertical-align:top; }
+    .editor-table .time-col { min-width:100px; }
   </style>
 </head>
 <body>
@@ -560,7 +564,49 @@
             <ul id="list-teachers" style="margin-top: 0.5rem; padding-left: 1.2rem;"></ul>
           </div>
         </div>
+
+        <div class="card" style="margin-top:1rem;">
+          <div class="card-header">編輯班級完整課表（本機儲存）</div>
+          <div class="toolbar">
+            <label for="edit-class-select"><strong>選擇班級：</strong></label>
+            <select id="edit-class-select" onchange="renderClassEditor()"></select>
+            <label for="edit-class-mentor"><strong>導師：</strong></label>
+            <input id="edit-class-mentor" placeholder="導師姓名">
+            <button class="btn-primary" onclick="saveClassEditor()">儲存本班課表</button>
+            <button class="btn-danger" onclick="deleteSelectedClass()">刪除本班</button>
+          </div>
+          <p class="hint">可逐格修改「課程名稱」及「授課教師」。按下儲存後會寫入本機，並留下操作紀錄；不會改動系統內建預設資料。</p>
+          <div class="table-responsive"><table class="editor-table"><thead><tr><th>節次／時間</th><th>星期一<br>課程／教師</th><th>星期二<br>課程／教師</th><th>星期三<br>課程／教師</th><th>星期四<br>課程／教師</th><th>星期五<br>課程／教師</th></tr></thead><tbody id="editor-schedule-body"></tbody></table></div>
+        </div>
       </div>
+
+        <div class="card" style="margin-top:1rem;">
+          <div class="card-header">100 年學年度／學期版本管理</div>
+          <p class="smart-intro">每個學年度與學期都是獨立的本機資料版本。預設範圍為民國 115～214 學年度，共 100 年；切換版本不會覆蓋其他年度。</p>
+          <div class="toolbar">
+            <label for="version-start-year"><strong>起始學年度：</strong></label>
+            <input id="version-start-year" type="number" min="1" max="999" value="115" style="width:100px">
+            <label for="version-year"><strong>目前學年度：</strong></label>
+            <select id="version-year"></select>
+            <select id="version-semester"><option value="1">第 1 學期</option><option value="2">第 2 學期</option></select>
+            <button class="btn-primary" onclick="switchScheduleVersion()">切換／建立版本</button>
+            <button onclick="cloneCurrentVersion()">複製目前版本到選定年度</button>
+            <button class="btn-success" onclick="downloadAllVersions()">匯出所有年度資料</button>
+          </div>
+          <p class="hint">目前使用版本：<strong id="current-version-label">民國 115 學年度第 1 學期</strong>。新增年度會先建立完整 33 班資料，再由系統資料管理逐班修改。</p>
+        
+          <div class="card" style="margin-top:1rem;">
+            <div class="card-header">設備轉移｜CSV 備份與貼上匯入</div>
+            <p class="smart-intro">換手機或電腦前，先下載完整 CSV；在新設備開啟本 HTML 後，把 CSV 全文貼到下方即可還原所有學年度、學期、班級與課程資料。</p>
+            <div class="toolbar">
+              <button class="btn-success" onclick="downloadTransferCsv()">下載完整轉移 CSV</button>
+              <button class="btn-primary" onclick="importTransferCsvText()">貼上並匯入 CSV</button>
+              <input type="file" id="transfer-csv-file" accept=".csv,text/csv" onchange="loadTransferCsvFile(event)">
+            </div>
+            <textarea id="transfer-csv-input" rows="7" style="width:100%; margin-top:.75rem; font-family:monospace;" placeholder="請將 CSV 全文貼在這裡，格式需由智慧課表匯出"></textarea>
+            <p class="hint">匯入會取代目前本機的年度版本資料；匯入前建議先下載一份目前資料備份。</p>
+          </div>
+        </div>
     </div>
   </main>
 
@@ -2396,12 +2442,17 @@
     const TEACHER_KEY = "smart_teachers_list_v2";
     const CHANGE_RECORD_KEY = "smart_change_records_v1";
     const OPERATION_LOG_KEY = "smart_operation_logs_v1";
+    const VERSION_STORE_KEY = "smart_schedule_versions_v1";
+    const VERSION_CONFIG_KEY = "smart_schedule_version_config_v1";
     let changeRecords = [];
+    let versionStore = {};
+    let versionConfig = { startYear: 115, totalYears: 100, schoolYear: 115, semester: 1 };
     let operationLogs = [];
     let systemScheduleData = {};
     let systemTeachersList = [];
 
     window.onload = function() {
+      loadVersionState();
       loadLocalStorageData();
       loadRecords();
       logOperation("系統啟動", `載入完整 ${Object.keys(defaultScheduleData).length} 班預設課表`);
@@ -2464,18 +2515,152 @@
       alert("紀錄已清除。");
     }
 
+    function currentVersionKey() { return `${versionConfig.schoolYear}-${versionConfig.semester}`; }
+
+    function saveVersionState() {
+      localStorage.setItem(VERSION_STORE_KEY, JSON.stringify(versionStore));
+      localStorage.setItem(VERSION_CONFIG_KEY, JSON.stringify(versionConfig));
+    }
+
+    function loadVersionState() {
+      try { versionStore = JSON.parse(localStorage.getItem(VERSION_STORE_KEY) || "{}"); } catch (e) { versionStore = {}; }
+      try { versionConfig = { ...versionConfig, ...JSON.parse(localStorage.getItem(VERSION_CONFIG_KEY) || "{}")} } catch (e) {}
+      versionConfig.startYear = Number(versionConfig.startYear) || 115;
+      versionConfig.totalYears = 100;
+      versionConfig.schoolYear = Number(versionConfig.schoolYear) || versionConfig.startYear;
+      versionConfig.semester = Number(versionConfig.semester) === 2 ? 2 : 1;
+    }
+
+    function populateVersionControls() {
+      const start = document.getElementById("version-start-year");
+      const year = document.getElementById("version-year");
+      const sem = document.getElementById("version-semester");
+      if (!start || !year || !sem) return;
+      start.value = versionConfig.startYear;
+      year.innerHTML = "";
+      for (let y = versionConfig.startYear; y < versionConfig.startYear + 100; y++) {
+        const opt = document.createElement("option"); opt.value = y; opt.textContent = `民國 ${y} 學年度`; year.appendChild(opt);
+      }
+      year.value = versionConfig.schoolYear;
+      sem.value = versionConfig.semester;
+      const label = document.getElementById("current-version-label");
+      if (label) label.textContent = `民國 ${versionConfig.schoolYear} 學年度第 ${versionConfig.semester} 學期`;
+    }
+
+    function ensureCurrentVersion() {
+      const key = currentVersionKey();
+      if (!versionStore[key]) versionStore[key] = JSON.parse(JSON.stringify(defaultScheduleData));
+      systemScheduleData = versionStore[key];
+      saveVersionState();
+    }
+
+    function switchScheduleVersion() {
+      const start = Math.max(1, Math.min(999, Number(document.getElementById("version-start-year").value) || 115));
+      const year = Number(document.getElementById("version-year").value);
+      const semester = Number(document.getElementById("version-semester").value);
+      versionConfig.startYear = start; versionConfig.schoolYear = year; versionConfig.semester = semester === 2 ? 2 : 1; versionConfig.totalYears = 100;
+      const key = currentVersionKey();
+      const existed = Boolean(versionStore[key]);
+      if (!existed) versionStore[key] = JSON.parse(JSON.stringify(defaultScheduleData));
+      systemScheduleData = versionStore[key];
+      saveVersionState(); localStorage.setItem(STORAGE_KEY, JSON.stringify(systemScheduleData));
+      extractAndSaveTeachers();
+      logOperation("切換課表版本", `切換至民國 ${versionConfig.schoolYear} 學年度第 ${versionConfig.semester} 學期${existed ? "（載入既有資料）" : "（建立完整預設資料）"}`);
+      initUI();
+      alert(existed ? "已載入該學年度版本。" : "已建立新的完整 33 班年度版本，可開始編輯。");
+    }
+
+    function cloneCurrentVersion() {
+      const start = Math.max(1, Math.min(999, Number(document.getElementById("version-start-year").value) || 115));
+      const year = Number(document.getElementById("version-year").value);
+      const semester = Number(document.getElementById("version-semester").value);
+      const key = `${year}-${semester}`;
+      if (key === currentVersionKey()) { alert("選定版本與目前版本相同。"); return; }
+      if (versionStore[key] && !confirm("該年度已有資料，確定以目前版本覆蓋？")) return;
+      versionStore[key] = JSON.parse(JSON.stringify(systemScheduleData));
+      versionConfig.startYear = start; versionConfig.schoolYear = year; versionConfig.semester = semester;
+      saveVersionState(); systemScheduleData = versionStore[key]; localStorage.setItem(STORAGE_KEY, JSON.stringify(systemScheduleData)); extractAndSaveTeachers();
+      logOperation("複製課表版本", `將目前版本複製至民國 ${year} 學年度第 ${semester} 學期`);
+      initUI(); alert("已複製並切換至新年度版本。");
+    }
+
+    function csvEscape(value) { return `"${String(value ?? "").replace(/"/g, '""')}"`; }
+
+    function downloadTransferCsv() {
+      const allVersions = { ...versionStore, [currentVersionKey()]: systemScheduleData };
+      const rows = [["學年度", "學期", "班級", "導師", "節次", "星期", "課程", "教師"]];
+      Object.keys(allVersions).sort().forEach(key => {
+        const [year, semester] = key.split("-");
+        Object.keys(allVersions[key] || {}).forEach(cls => {
+          const info = allVersions[key][cls];
+          timeSlots.forEach(slot => (info.schedule[slot.period] || []).forEach((cell, day) => {
+            const parts = String(cell || "-").split("<br>");
+            rows.push([year, semester, cls, info.mentor || "未指定", slot.period, day + 1, parts[0] || "-", parts.slice(1).join("/") || "-"]);
+          }));
+        });
+      });
+      downloadText("智慧課表-完整設備轉移.csv", "\ufeff" + rows.map(row => row.map(csvEscape).join(",")).join("\n"), "text/csv;charset=utf-8");
+      logOperation("匯出設備轉移 CSV", `匯出 ${Object.keys(allVersions).length} 個版本`);
+    }
+
+    function parseTransferCsv(text) {
+      const rows = []; let row = []; let field = ""; let quoted = false;
+      for (let i = 0; i < text.length; i++) { const ch = text[i];
+        if (ch === '"') { if (quoted && text[i + 1] === '"') { field += '"'; i++; } else quoted = !quoted; }
+        else if (ch === ',' && !quoted) { row.push(field); field = ""; }
+        else if ((ch === '\n' || ch === '\r') && !quoted) { if (ch === '\r' && text[i+1] === '\n') i++; row.push(field); if (row.some(x => x.trim())) rows.push(row); row=[]; field=""; }
+        else field += ch;
+      }
+      if (field || row.length) { row.push(field); rows.push(row); }
+      return rows;
+    }
+
+    function loadTransferCsvFile(event) {
+      const file = event.target.files?.[0]; if (!file) return;
+      const reader = new FileReader(); reader.onload = () => { document.getElementById("transfer-csv-input").value = reader.result; }; reader.readAsText(file, "UTF-8");
+    }
+
+    function importTransferCsvText() {
+      const text = document.getElementById("transfer-csv-input").value.trim();
+      if (!text) { alert("請先貼上智慧課表匯出的 CSV 內容。"); return; }
+      const rows = parseTransferCsv(text.replace(/^\ufeff/, ""));
+      if (rows.length < 2 || rows[0][0] !== "學年度") { alert("CSV 格式不正確，請使用智慧課表匯出的完整轉移 CSV。"); return; }
+      const imported = {};
+      rows.slice(1).forEach(r => {
+        if (r.length < 8) return;
+        const [year, semester, cls, mentor, period, day, course, teacher] = r;
+        const key = `${year}-${semester}`;
+        if (!imported[key]) imported[key] = {};
+        if (!imported[key][cls]) { imported[key][cls] = { mentor: mentor || "未指定", schedule: {} }; timeSlots.forEach(slot => imported[key][cls].schedule[slot.period] = ["-", "-", "-", "-", "-"]); }
+        const p = Number(period), d = Number(day) - 1;
+        if (p >= 1 && p <= 7 && d >= 0 && d <= 4) imported[key][cls].schedule[p][d] = `${course || "-"}<br>${teacher || "-"}`;
+      });
+      const versionKeys = Object.keys(imported);
+      if (!versionKeys.length) { alert("CSV 沒有可匯入的課表資料。"); return; }
+      if (!confirm(`確認匯入 ${versionKeys.length} 個學年度／學期版本？目前本機年度資料會被取代。`)) return;
+      versionStore = imported;
+      const first = versionKeys[0].split("-"); versionConfig.schoolYear = Number(first[0]); versionConfig.semester = Number(first[1]) || 1;
+      saveVersionState(); systemScheduleData = versionStore[currentVersionKey()] || versionStore[versionKeys[0]]; localStorage.setItem(STORAGE_KEY, JSON.stringify(systemScheduleData)); extractAndSaveTeachers();
+      logOperation("匯入設備轉移 CSV", `匯入 ${versionKeys.length} 個版本、${Object.keys(systemScheduleData).length} 個班級`);
+      initUI(); alert("CSV 匯入完成，課表已儲存於本機。");
+    }
+
+    function downloadAllVersions() {
+      downloadText("智慧課表-100年年度資料.json", JSON.stringify({ versionConfig, versions: versionStore }, null, 2), "application/json;charset=utf-8");
+      logOperation("匯出年度資料", `匯出 ${Object.keys(versionStore).length} 個學年度／學期版本`);
+    }
+
     function loadLocalStorageData() {
       const storedSchedule = localStorage.getItem(STORAGE_KEY);
       let parsed = null;
       try { parsed = storedSchedule ? JSON.parse(storedSchedule) : null; } catch (e) { parsed = null; }
       const defaultClassCount = Object.keys(defaultScheduleData).length;
-      const hasCompleteDefaults = parsed && Object.keys(parsed).length >= defaultClassCount && parsed["餐三甲"];
-      if (hasCompleteDefaults) {
-        systemScheduleData = parsed;
-      } else {
-        systemScheduleData = JSON.parse(JSON.stringify(defaultScheduleData));
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(systemScheduleData));
-      }
+      const legacyComplete = parsed && Object.keys(parsed).length >= defaultClassCount && parsed["餐三甲"];
+      const key = currentVersionKey();
+      if (!versionStore[key]) versionStore[key] = legacyComplete ? parsed : JSON.parse(JSON.stringify(defaultScheduleData));
+      systemScheduleData = versionStore[key];
+      saveVersionState();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(systemScheduleData));
 
       const storedTeachers = localStorage.getItem(TEACHER_KEY);
       if (storedTeachers) {
@@ -2507,6 +2692,8 @@
     }
 
     function saveScheduleData() {
+      versionStore[currentVersionKey()] = systemScheduleData;
+      saveVersionState();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(systemScheduleData));
     }
 
@@ -2517,9 +2704,11 @@
     function resetToDefaultData() {
       if (confirm("確認恢復為系統初始預設的115學年度上學期課表資料？自訂資料將會被覆蓋。")) {
         systemScheduleData = JSON.parse(JSON.stringify(defaultScheduleData));
+        versionStore[currentVersionKey()] = systemScheduleData;
+        saveVersionState();
         localStorage.setItem(STORAGE_KEY, JSON.stringify(systemScheduleData));
         extractAndSaveTeachers();
-        logOperation("恢復預設資料", `恢復完整 ${Object.keys(defaultScheduleData).length} 班預設課表`);
+        logOperation("恢復預設資料", `恢復目前民國 ${versionConfig.schoolYear} 學年度第 ${versionConfig.semester} 學期的完整預設課表`);
         initUI();
         alert("資料已重置為完整預設課表。");
       }
@@ -2529,10 +2718,13 @@
       populateClassDropdowns();
       populateTeacherDropdowns();
       syncQuickTools();
+      populateVersionControls();
       renderClassSchedule();
       renderTeacherSchedule();
       updateSwapOptions();
       renderDataManagementLists();
+      renderClassEditorSelect();
+      renderClassEditor();
       renderRecords();
     }
 
@@ -2890,6 +3082,74 @@
       saveScheduleData();
       alert("課表異動更新完畢，紀錄已保存。");
       renderClassSchedule(); renderTeacherSchedule(); updateSwapOriginalCourse();
+    }
+
+    function escapeEditorValue(value) {
+      return String(value || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function renderClassEditorSelect() {
+      const select = document.getElementById("edit-class-select");
+      if (!select) return;
+      const current = select.value;
+      select.innerHTML = "";
+      Object.keys(systemScheduleData).forEach(cls => {
+        const option = document.createElement("option"); option.value = cls; option.textContent = cls; select.appendChild(option);
+      });
+      if (systemScheduleData[current]) select.value = current;
+    }
+
+    function renderClassEditor() {
+      const select = document.getElementById("edit-class-select");
+      const body = document.getElementById("editor-schedule-body");
+      if (!select || !body) return;
+      const cls = select.value;
+      const info = systemScheduleData[cls];
+      if (!info) { body.innerHTML = ""; return; }
+      document.getElementById("edit-class-mentor").value = info.mentor || "";
+      body.innerHTML = timeSlots.map(slot => {
+        const cells = (info.schedule[slot.period] || ["-", "-", "-", "-", "-"]).map((entry, day) => {
+          const parts = String(entry || "-").split("<br>");
+          return `<td><input id="edit-course-${slot.period}-${day}" value="${escapeEditorValue(parts[0])}" placeholder="課程名稱"><input id="edit-teacher-${slot.period}-${day}" value="${escapeEditorValue(parts.slice(1).join("<br>") || "-")}" placeholder="授課教師"></td>`;
+        }).join("");
+        return `<tr><td class="time-col">${slot.name}<br>${slot.start}～${slot.end}</td>${cells}</tr>`;
+      }).join("");
+    }
+
+    function saveClassEditor() {
+      const cls = document.getElementById("edit-class-select").value;
+      if (!cls || !systemScheduleData[cls]) return;
+      const oldMentor = systemScheduleData[cls].mentor || "";
+      const newMentor = document.getElementById("edit-class-mentor").value.trim() || "未指定";
+      const schedule = {};
+      timeSlots.forEach(slot => {
+        schedule[slot.period] = [0,1,2,3,4].map(day => {
+          const course = document.getElementById(`edit-course-${slot.period}-${day}`).value.trim() || "-";
+          const teacher = document.getElementById(`edit-teacher-${slot.period}-${day}`).value.trim() || "-";
+          return `${course}<br>${teacher}`;
+        });
+      });
+      systemScheduleData[cls] = { mentor: newMentor, schedule };
+      saveScheduleData();
+      extractAndSaveTeachers();
+      logOperation("編輯班級課表", `${cls} 已更新導師、35 格課程與授課教師${oldMentor !== newMentor ? `；導師 ${oldMentor} → ${newMentor}` : ""}`);
+      initUI();
+      document.getElementById("edit-class-select").value = cls;
+      renderClassEditor();
+      alert(`${cls} 課表已儲存到本機。`);
+    }
+
+    function deleteSelectedClass() {
+      const cls = document.getElementById("edit-class-select").value;
+      if (!cls || !systemScheduleData[cls]) return;
+      if (Object.keys(systemScheduleData).length <= 1) { alert("至少要保留一個班級。"); return; }
+      if (!confirm(`確定刪除 ${cls} 的班級與完整課表資料？此動作可透過恢復預設資料復原。`)) return;
+      delete systemScheduleData[cls];
+      saveScheduleData();
+      extractAndSaveTeachers();
+      logOperation("刪除班級", `刪除 ${cls} 與其 35 格課表資料`);
+      initUI();
+      alert(`${cls} 已刪除並保存於本機資料。`);
     }
 
     function renderDataManagementLists() {
