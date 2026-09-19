@@ -3,628 +3,264 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智慧課表 - 國立東港高級海事水產職業學校</title>
+    <title>智慧課表 - 教務處即時管理系統</title>
     <style>
         :root {
             --primary-color: #0056b3;
+            --primary-dark: #003d80;
             --secondary-color: #e9ecef;
             --border-color: #dee2e6;
             --text-color: #212529;
             --card-bg: #ffffff;
             --accent-bg: #f8f9fa;
+            --active-color: #fff3cd;
+            --highlight-text: #856404;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f4f6f9; color: var(--text-color); padding: 15px; }
 
-        body {
-            background-color: #f4f6f9;
-            color: var(--text-color);
-            padding: 15px;
-        }
+        header { text-align: center; margin-bottom: 15px; }
+        h1 { color: var(--primary-color); font-size: 1.8rem; margin-bottom: 5px; }
+        .subtitle { font-size: 0.95rem; color: #6c757d; }
 
-        header {
-            text-align: center;
-            margin-bottom: 20px;
+        /* 即時狀態卡片 */
+        .status-card {
+            background: linear-gradient(135deg, #0056b3, #003d80);
+            color: white; padding: 12px 20px; border-radius: 10px;
+            margin: 0 auto 15px auto; max-width: 1000px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); flex-wrap: wrap; gap: 10px;
         }
+        .status-time { font-size: 1.3rem; font-weight: bold; }
+        .status-current { font-size: 1rem; background: rgba(255, 255, 255, 0.2); padding: 5px 12px; border-radius: 15px; }
 
-        h1 {
-            color: var(--primary-color);
-            font-size: 1.8rem;
-            margin-bottom: 5px;
+        /* 教務功能頁籤導覽 */
+        .nav-tabs { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; flex-wrap: wrap; }
+        .tab-btn {
+            padding: 10px 18px; border: 1px solid var(--border-color); background-color: #fff;
+            border-radius: 6px; cursor: pointer; font-weight: bold; color: var(--primary-color); transition: 0.2s;
         }
+        .tab-btn.active { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
 
-        .subtitle {
-            font-size: 0.95rem;
-            color: #6c757d;
-        }
+        .tab-content { display: none; max-width: 1000px; margin: 0 auto; }
+        .tab-content.active { display: block; }
 
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
+        .panel-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .panel-card h3 { color: var(--primary-color); margin-bottom: 15px; border-bottom: 2px solid var(--secondary-color); padding-bottom: 8px; }
 
-        select, input {
-            padding: 10px 15px;
-            font-size: 1rem;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            background-color: #fff;
-            outline: none;
-        }
+        /* 表單元素 */
+        .form-group { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+        .form-group label { width: 100px; font-weight: bold; }
+        select, input, button { padding: 8px 12px; font-size: 0.95rem; border: 1px solid #ced4da; border-radius: 6px; outline: none; }
+        button.btn-primary { background-color: var(--primary-color); color: white; border: none; cursor: pointer; }
+        button.btn-primary:hover { background-color: var(--primary-dark); }
 
-        select:focus, input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(0,86,179,.25);
-        }
+        /* 表格與高亮 */
+        .class-info { background-color: var(--primary-color); color: white; padding: 12px 20px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; font-weight: bold; }
+        .table-container { background-color: var(--card-bg); border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: center; min-width: 650px; }
+        th, td { border: 1px solid var(--border-color); padding: 10px 8px; font-size: 0.9rem; }
+        th { background-color: var(--secondary-color); color: #495057; }
+        td.period { background-color: var(--accent-bg); font-weight: bold; width: 140px; }
+        .time-badge { display: block; font-size: 0.75rem; color: #6c757d; font-weight: normal; }
+        
+        .active-row { background-color: var(--active-color) !important; }
+        .active-cell { background-color: #ffe8a1 !important; font-weight: bold; color: #856404; border: 2px solid #ffe066 !important; }
+        .active-tag { display: inline-block; background-color: #d39e00; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
 
-        .class-info {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px 8px 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 1.1rem;
-            font-weight: bold;
-        }
+        /* 調課紀錄列表 */
+        .log-list { list-style: none; max-height: 250px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; background: #fafafa; }
+        .log-item { padding: 8px 0; border-bottom: 1px dashed #ccc; font-size: 0.9rem; }
+        .log-item:last-child { border-bottom: none; }
+        .log-time { color: #6c757d; font-size: 0.8rem; }
 
-        /* 電腦端表格樣式 */
-        .table-container {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            overflow-x: auto;
-            margin-bottom: 30px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: center;
-            min-width: 600px;
-        }
-
-        th, td {
-            border: 1px solid var(--border-color);
-            padding: 10px 8px;
-            font-size: 0.9rem;
-        }
-
-        th {
-            background-color: var(--secondary-color);
-            color: #495057;
-            font-weight: 600;
-        }
-
-        td.period {
-            background-color: var(--accent-bg);
-            font-weight: bold;
-            width: 80px;
-        }
-
-        /* 手機端卡片樣式 */
-        .mobile-schedule {
-            display: none;
-            flex-direction: column;
-            gap: 15px;
-            background-color: var(--card-bg);
-            padding: 15px;
-            border-radius: 0 0 8px 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .day-card {
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        .day-title {
-            background-color: var(--secondary-color);
-            padding: 8px 12px;
-            font-weight: bold;
-            color: var(--primary-color);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .period-list {
-            list-style: none;
-        }
-
-        .period-item {
-            padding: 8px 12px;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-        }
-
-        .period-item:last-child {
-            border-bottom: none;
-        }
-
-        .period-num {
-            color: #6c757d;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        /* 響應式切換：螢幕寬度小於 768px 時自動使用卡片排版 */
-        @media (max-width: 767px) {
-            .desktop-table {
-                display: none;
-            }
-            .mobile-schedule {
-                display: flex;
-            }
-        }
+        @media (max-width: 767px) { .desktop-table { display: none; } }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>智慧課表</h1>
-        <div class="subtitle">國立東港高級海事水產職業學校 115 學年度第 1 學期</div>
+        <h1>智慧課表管理系統</h1>
+        <div class="subtitle">國立東港海事 - 教務處控制台</div>
     </header>
 
-    <div class="controls">
-        <select id="classSelect" onchange="renderSchedule()">
-            <!-- 由 JS 自動生成 33 個班級選項 -->
-        </select>
-        <input type="text" id="searchInput" placeholder="搜尋班級或導師..." oninput="filterClasses()">
+    <!-- 即時時鐘與動態卡片 -->
+    <div class="status-card">
+        <div class="status-time" id="clock">12:00:00</div>
+        <div class="status-current" id="currentPeriodText">讀取中...</div>
     </div>
 
-    <div class="table-container">
-        <div class="class-info">
-            <span id="currentClassName">班級名稱</span>
-            <span id="currentTutor">導師：-</span>
+    <!-- 頁籤選單 -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('viewTab')">課表即時查詢</button>
+        <button class="tab-btn" onclick="switchTab('swapTab')">教務調課設定</button>
+        <button class="tab-btn" onclick="switchTab('classTab')">新建/修改班級</button>
+        <button class="tab-btn" onclick="switchTab('settingsTab')">作息修改/調課紀錄</button>
+    </div>
+
+    <!-- TAB 1: 課表即時查詢 -->
+    <div id="viewTab" class="tab-content active">
+        <div class="panel-card" style="padding: 10px; text-align: center;">
+            <select id="classSelect" onchange="renderSchedule()"></select>
+            <input type="text" id="searchInput" placeholder="搜尋班級或導師..." oninput="filterClasses()">
         </div>
 
-        <!-- 電腦版 (表格視圖) -->
-        <table class="desktop-table">
-            <thead>
-                <tr>
-                    <th>節次</th>
-                    <th>星期一</th>
-                    <th>星期二</th>
-                    <th>星期三</th>
-                    <th>星期四</th>
-                    <th>星期五</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <!-- 由 JS 動態繪製 -->
-            </tbody>
-        </table>
-
-        <!-- 手機版 (清單視圖) -->
-        <div class="mobile-schedule" id="mobileList">
-            <!-- 由 JS 動態繪製 -->
+        <div class="table-container">
+            <div class="class-info">
+                <span id="currentClassName">班級名稱</span>
+                <span id="currentTutor">導師：-</span>
+            </div>
+            <table class="desktop-table">
+                <thead>
+                    <tr>
+                        <th>節次 / 時間</th>
+                        <th>星期一</th>
+                        <th>星期二</th>
+                        <th>星期三</th>
+                        <th>星期四</th>
+                        <th>星期五</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
         </div>
     </div>
 
+    <!-- TAB 2: 教務調課設定 -->
+    <div id="swapTab" class="tab-content">
+        <div class="panel-card">
+            <h3>教務處線上調課單</h3>
+            <p style="color: #6c757d; margin-bottom: 15px; font-size: 0.9rem;">請選擇要進行課程對調的兩個班級、星期與節次：</p>
+            
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <!-- 課程 A -->
+                <div style="flex: 1; min-width: 280px; background: #f8f9fa; padding: 15px; border-radius: 6px;">
+                    <h4 style="color: var(--primary-color); margin-bottom: 10px;">課程 A</h4>
+                    <div class="form-group"><label>班級：</label><select id="swapClassA"></select></div>
+                    <div class="form-group"><label>星期：</label>
+                        <select id="swapDayA">
+                            <option value="0">星期一</option><option value="1">星期二</option>
+                            <option value="2">星期三</option><option value="3">星期四</option><option value="4">星期五</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>節次：</label>
+                        <select id="swapPeriodA">
+                            <option value="1">第 1 節</option><option value="2">第 2 節</option><option value="3">第 3 節</option>
+                            <option value="4">第 4 節</option><option value="5">第 5 節</option><option value="6">第 6 節</option><option value="7">第 7 節</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 課程 B -->
+                <div style="flex: 1; min-width: 280px; background: #f8f9fa; padding: 15px; border-radius: 6px;">
+                    <h4 style="color: var(--primary-color); margin-bottom: 10px;">課程 B</h4>
+                    <div class="form-group"><label>班級：</label><select id="swapClassB"></select></div>
+                    <div class="form-group"><label>星期：</label>
+                        <select id="swapDayB">
+                            <option value="0">星期一</option><option value="1">星期二</option>
+                            <option value="2">星期三</option><option value="3">星期四</option><option value="4">星期五</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>節次：</label>
+                        <select id="swapPeriodB">
+                            <option value="1">第 1 節</option><option value="2">第 2 節</option><option value="3">第 3 節</option>
+                            <option value="4">第 4 節</option><option value="5">第 5 節</option><option value="6">第 6 節</option><option value="7">第 7 節</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px;">
+                <label>調課事由：</label>
+                <input type="text" id="swapReason" placeholder="例如：教師公差調課 / 研習需求" style="flex: 1;">
+            </div>
+            <button class="btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;" onclick="handleSwapSubmit()">確認執行調課</button>
+        </div>
+    </div>
+
+    <!-- TAB 3: 新建/修改班級課表 -->
+    <div id="classTab" class="tab-content">
+        <div class="panel-card">
+            <h3>班級基本設定</h3>
+            <div class="form-group">
+                <label>班級名稱：</label>
+                <input type="text" id="newClassName" placeholder="例如：水三甲">
+            </div>
+            <div class="form-group">
+                <label>導師姓名：</label>
+                <input type="text" id="newTutorName" placeholder="例如：王小明">
+            </div>
+            <button class="btn-primary" onclick="handleClassSubmit()">新增 / 更新班級基本資料</button>
+        </div>
+    </div>
+
+    <!-- TAB 4: 作息修改與歷史紀錄 -->
+    <div id="settingsTab" class="tab-content">
+        <div class="panel-card">
+            <h3>教務調課歷史紀錄</h3>
+            <ul class="log-list" id="logListContainer">
+                <!-- 動態繪製調課紀錄 -->
+            </ul>
+        </div>
+
+        <div class="panel-card">
+            <h3>作息時間維護 (東港海事作息)[span_1](start_span)[span_1](end_span)</h3>
+            <div id="timeScheduleEditor">
+                <!-- 動態繪製作息時間編輯器 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="curriculum.js"></script>
     <script>
-        // 33 個班級完整課表資料集
-        const scheduleData = {
-            "輪一甲": {
-                tutor: "郭文凱",
-                schedule: [
-                    ["船用電學", "電腦輔助繪圖實習", "體育", "船用電學", "輪機概論"],
-                    ["輪機概論", "生涯規劃", "數學", "船舶金工實習", "全民國防教育"],
-                    ["英語文", "藝術生活", "物理", "船舶金工實習", "歷史"],
-                    ["歷史", "國語文", "週會/聯課活動", "繩纜作業實習", "國語文"],
-                    ["國語文", "原住民族語文", "週會/聯課活動", "繩纜作業實習", "數學"],
-                    ["國語文", "健康與護理", "繩纜作業實習", "基礎銲接實習", "物理"],
-                    ["體育", "班會", "基礎銲接實習", "音樂", "資訊科技"]
-                ]
-            },
-            "輪一乙": {
-                tutor: "洪晟輔",
-                schedule: [
-                    ["船舶金工實習", "體育", "健康與護理", "國語文", "數學"],
-                    ["全民國防教育", "船舶金工實習", "英語文", "電腦輔助繪圖實習", "生涯規劃"],
-                    ["數學", "船舶金工實習", "藝術生活", "國語文", "體育"],
-                    ["物理", "繩纜作業實習", "船用電學", "國語文", "英語文"],
-                    ["輪機概論", "繩纜作業實習", "週會/聯課活動", "物理", "閩南語文"],
-                    ["船用電學", "基礎銲接實習", "週會/聯課活動", "資訊科技", "歷史"],
-                    ["歷史", "基礎銲接實習", "班會", "輪機概論", "音樂"]
-                ]
-            },
-            "食一甲": {
-                tutor: "鄭純華",
-                schedule: [
-                    ["音樂", "全民國防教育", "食品概論", "烘焙食品加工實習", "數學"],
-                    ["生涯規劃", "化學", "數學", "烘焙食品加工實習", "國語文"],
-                    ["食品概論", "基礎數學", "國語文", "烘焙食品加工實習", "國語文"],
-                    ["食品加工", "歷史", "化學", "烘焙食品加工實習", "體育"],
-                    ["健康與護理", "閩南語文", "週會/聯課活動", "烘焙食品加工實習", "資訊科技"],
-                    ["應用英文", "藝術生活", "週會/聯課活動", "歷史", "英語文"],
-                    ["英語文", "體育", "班會", "食品加工", "食品概論"]
-                ]
-            },
-            "食一乙": {
-                tutor: "陳可芃",
-                schedule: [
-                    ["生涯規劃", "化學", "健康與護理", "客語文", "烘焙食品加工實習"],
-                    ["食品概論", "藝術生活", "全民國防教育", "國語文", "烘焙食品加工實習"],
-                    ["歷史", "應用英文", "體育", "國語文", "烘焙食品加工實習"],
-                    ["音樂", "數學", "國語文", "體育", "烘焙食品加工實習"],
-                    ["基礎數學", "資訊科技", "週會/聯課活動", "化學", "烘焙食品加工實習"],
-                    ["英語文", "歷史", "週會/聯課活動", "食品概論", "數學"],
-                    ["食品加工", "食品概論", "班會", "英語文", "食品加工"]
-                ]
-            },
-            "養一甲": {
-                tutor: "王嘉穗",
-                schedule: [
-                    ["英語文", "英語文", "數學", "化學", "水產概要"],
-                    ["音樂", "生物", "餌料生物實習", "觀賞水族養殖實習", "生物"],
-                    ["國語文", "餌料生物學", "餌料生物實習", "觀賞水族養殖實習", "觀賞魚繁養殖"],
-                    ["體育", "餌料生物學", "餌料生物實習", "觀賞水族養殖實習", "觀賞魚繁養殖"],
-                    ["地理", "化學", "週會/聯課活動", "地理", "全民國防教育"],
-                    ["應用數學", "水產概要", "週會/聯課活動", "國語文", "體育"],
-                    ["水產概要", "原住民族語文", "班會", "國語文", "數學"]
-                ]
-            },
-            "家一甲": {
-                tutor: "張人心",
-                schedule: [
-                    ["家政概論", "數學", "物理", "英語文", "物理"],
-                    ["飲料調製", "歷史", "國語文", "服裝製作實務", "數學"],
-                    ["飲料調製", "英語文", "國語文", "服裝製作實務", "家政概論"],
-                    ["飲料調製", "體育", "歷史", "服裝製作實務", "國語文"],
-                    ["資訊科技", "健康與護理", "週會/聯課活動", "多媒材創作實務", "色彩概論"],
-                    ["資訊科技", "閩南語文", "週會/聯課活動", "多媒材創作實務", "音樂"],
-                    ["色彩概論", "全民國防教育", "班會", "多媒材創作實務", "體育"]
-                ]
-            },
-            "管一甲": {
-                tutor: "吳倚萱",
-                schedule: [
-                    ["體育", "健康與護理", "會計學實務", "會計學實務", "音樂"],
-                    ["物理", "英語文", "數位科技概論", "商業概論", "會計學"],
-                    ["數學", "門市經營實務", "數位科技概論", "英語文", "商業概論"],
-                    ["地理", "門市經營實務", "會計學", "週會/聯課活動", "資訊科技"],
-                    ["閩南語文", "數學", "班會", "週會/聯課活動", "資訊科技"],
-                    ["-", "-", "-", "數學", "國語文"],
-                    ["-", "-", "-", "-", "物理"]
-                ]
-            },
-            "管一乙": {
-                tutor: "張茹茗",
-                schedule: [
-                    ["國語文", "門市經營實務", "會計學實務", "客語文", "數學"],
-                    ["國語文", "門市經營實務", "音樂", "全民國防教育", "物理"],
-                    ["數位科技概論", "會計學", "地理", "資訊科技", "龔榮志"],
-                    ["數位科技概論", "會計學實務", "數學", "資訊科技", "體育"],
-                    ["英語文", "物理", "週會/聯課活動", "體育", "數學"],
-                    ["健康與護理", "國語文", "週會/聯課活動", "會計學", "英語文"],
-                    ["商業概論", "地理", "班會", "商業概論", "會計學"]
-                ]
-            },
-            "電一甲": {
-                tutor: "李怡蓉",
-                schedule: [
-                    ["資訊科技", "英語文", "程式設計實習", "英語文", "國語文"],
-                    ["數學", "全民國防教育", "程式設計實習", "應用英文", "國語文"],
-                    ["音樂", "藝術生活", "程式設計實習", "數學", "數學"],
-                    ["體育", "生涯規劃", "體育", "國語文", "數學"],
-                    ["基礎電子實習", "地理", "週會/聯課活動", "閩南語文", "物理"],
-                    ["基礎電子實習", "物理", "週會/聯課活動", "基本電學", "基本電學"],
-                    ["基礎電子實習", "健康與護理", "班會", "地理", "基本電學"]
-                ]
-            },
-            "電一乙": {
-                tutor: "黃瓊瑩",
-                schedule: [
-                    ["地理", "國語文", "體育", "物理", "國語文"],
-                    ["資訊科技", "基本電學", "音樂", "程式設計實習", "生涯規劃"],
-                    ["國語文", "地理", "數學", "程式設計實習", "閩南語文"],
-                    ["基本電學", "基本電學", "體育", "程式設計實習", "健康與護理"],
-                    ["數學", "藝術生活", "週會/聯課活動", "基礎電子實習", "全民國防教育"],
-                    ["數學", "英語文", "週會/聯課活動", "基礎電子實習", "-"],
-                    ["物理", "應用英文", "班會", "基礎電子實習", "-"]
-                ]
-            },
-            "烘一甲": {
-                tutor: "卓惠婷",
-                schedule: [
-                    ["英語文", "英語文", "音樂", "烘焙食品加工實習", "餅乾製作實習"],
-                    ["化學", "體育", "數學", "烘焙食品加工實習", "餅乾製作實習"],
-                    ["食品加工", "健康與護理", "化學", "烘焙食品加工實習", "餅乾製作實習"],
-                    ["烘焙食品概論", "國語文", "全民國防教育", "麵包製作實習", "穀類加工實習"],
-                    ["國語文", "烘焙食品概論", "週會/聯課活動", "麵包製作實習", "穀類加工實習"],
-                    ["國語文", "食品加工", "週會/聯課活動", "麵包製作實習", "穀類加工實習"],
-                    ["生涯規劃", "數學", "班會", "麵包製作實習", "閩南語文"]
-                ]
-            },
-            "輪二甲": {
-                tutor: "楊承哲",
-                schedule: [
-                    ["英語文", "國語文", "彈性學習", "船用內燃機", "電工機械"],
-                    ["船舶電器操作與保養實習", "國語文", "船用內燃機", "船用內燃機", "基本電工與實習"],
-                    ["船舶電器操作與保養實習", "公民與社會", "體育", "英語文", "基本電工與實習"],
-                    ["機電整合實習", "輔機", "船藝", "公民與社會", "基本電工與實習"],
-                    ["機電整合實習", "數學", "週會/聯課活動", "船藝", "輔機"],
-                    ["可程式控制實習", "電工機械", "週會/聯課活動", "船藝", "輔機"],
-                    ["可程式控制實習", "體育", "班會", "數學", "國語文"]
-                ]
-            },
-            "輪二乙": {
-                tutor: "陳容銜",
-                schedule: [
-                    ["電工機械", "數學", "彈性學習", "體育", "輔機"],
-                    ["國語文", "基本電工與實習", "船藝", "船舶電器操作與保養實習", "體育"],
-                    ["輔機", "基本電工與實習", "船用內燃機", "船舶電器操作與保養實習", "船用內燃機"],
-                    ["輔機", "基本電工與實習", "船用內燃機", "機電整合實習", "電工機械"],
-                    ["船藝", "英語文", "週會/聯課活動", "機電整合實習", "英語文"],
-                    ["船藝", "國語文", "週會/聯課活動", "可程式控制實習", "公民與社會"],
-                    ["公民與社會", "國語文", "班會", "可程式控制實習", "數學"]
-                ]
-            },
-            "食二甲": {
-                tutor: "蔡宛玲",
-                schedule: [
-                    ["公民與社會", "進階食品加工", "彈性學習", "食品微生物實習", "食品化學與分析實習"],
-                    ["應用英文進階", "食品加工實習", "進階食品加工", "食品微生物實習", "食品化學與分析實習"],
-                    ["國語文", "食品加工實習", "公民與社會", "食品微生物實習", "食品化學與分析實習"],
-                    ["國語文", "食品加工實習", "英語文", "數學", "體育"],
-                    ["數學", "水產加工實習", "週會/聯課活動", "應用數學", "食品化學與分析"],
-                    ["食品微生物", "水產加工實習", "週會/聯課活動", "食品化學與分析", "英語文"],
-                    ["體育", "水產加工實習", "班會", "國語文", "食品微生物"]
-                ]
-            },
-            "食二乙": {
-                tutor: "鍾秉君",
-                schedule: [
-                    ["食品化學與分析實習", "食品微生物", "彈性學習", "進階食品加工", "食品微生物實習"],
-                    ["食品化學與分析實習", "體育", "國語文", "食品加工實習", "食品微生物實習"],
-                    ["食品化學與分析實習", "數學", "應用數學", "食品加工實習", "食品微生物實習"],
-                    ["英語文", "應用英文進階", "公民與社會", "食品加工實習", "數學"],
-                    ["食品化學與分析", "國語文", "週會/聯課活動", "水產加工實習", "公民與社會"],
-                    ["體育", "國語文", "週會/聯課活動", "水產加工實習", "食品微生物"],
-                    ["進階食品加工", "食品化學與分析", "班會", "水產加工實習", "英語文"]
-                ]
-            },
-            "養二甲": {
-                tutor: "沈璐儀",
-                schedule: [
-                    ["英語文", "藝術生活", "彈性學習", "體育", "體育"],
-                    ["數學", "國語文", "經濟性魚蝦養殖實習", "專題入門", "應用英文"],
-                    ["水產增殖基礎實務", "國語文", "經濟性魚蝦養殖實習", "水質學實習", "英語文"],
-                    ["水產增殖基礎實務", "應用數學", "水產生物實務", "經濟性魚蝦養殖實習", "健康與護理"],
-                    ["生涯規劃", "水產生物實務", "週會/聯課活動", "專題入門", "數學"],
-                    ["水質學概要", "水產生物實務", "週會/聯課活動", "專題入門", "生命教育"],
-                    ["水質學概要", "水產生物實務", "班會", "水質學概要", "國語文"]
-                ]
-            },
-            "家二甲": {
-                tutor: "蔡婉莉",
-                schedule: [
-                    ["數學", "飾品設計與實務", "彈性學習", "烹飪", "數學"],
-                    ["英語文", "飾品設計與實務", "國語文", "烹飪", "家庭教育"],
-                    ["服裝畫實務", "手工藝", "體育", "烹飪", "國語文"],
-                    ["服裝畫實務", "手工藝", "藝術生活", "點心製作", "國語文"],
-                    ["立體裁剪實務", "家庭教育", "週會/聯課活動", "點心製作", "英語文"],
-                    ["立體裁剪實務", "立體裁剪實務", "週會/聯課活動", "食物製備原理", "生物"],
-                    ["生物", "應用英文", "班會", "食物製備原理", "體育"]
-                ]
-            },
-            "管二甲": {
-                tutor: "陳文雅",
-                schedule: [
-                    ["行銷實務", "數學", "體育", "彈性學習", "國語文"],
-                    ["行銷實務", "生物", "經濟學", "彈性學習", "應用英文"],
-                    ["經濟學", "會計學實務", "數位科技應用", "會計軟體應用", "經濟學"],
-                    ["會計學", "會計學實務", "數位科技應用", "會計軟體應用", "經濟學"],
-                    ["數學", "英語文", "週會/聯課活動", "英語文", "數位化資料處理"],
-                    ["國語文", "運輸學", "週會/聯課活動", "生物", "數位化資料處理"],
-                    ["國語文", "運輸學", "班會", "會計學", "體育"]
-                ]
-            },
-            "管二乙": {
-                tutor: "張書源",
-                schedule: [
-                    ["會計軟體應用", "會計學實務", "英語文", "彈性學習", "國語文"],
-                    ["會計軟體應用", "會計學實務", "數學", "彈性學習", "國語文"],
-                    ["應用英文", "體育", "數位化資料處理", "運輸學", "行銷實務"],
-                    ["體育", "生物", "數位化資料處理", "運輸學", "行銷實務"],
-                    ["數位科技應用", "國語文", "週會/聯課活動", "數學", "生物"],
-                    ["數位科技應用", "經濟學", "週會/聯課活動", "經濟學", "英語文"],
-                    ["會計學", "經濟學", "班會", "經濟學", "會計學"]
-                ]
-            },
-            "電二甲": {
-                tutor: "陳其英",
-                schedule: [
-                    ["電子材料應用實習", "應用英文進階", "電子學實習", "可程式邏輯設計實習", "生物"],
-                    ["電子材料應用實習", "英語文", "數位邏輯實習", "可程式邏輯設計實習", "體育"],
-                    ["電子材料應用實習", "生物", "數位邏輯實習", "可程式邏輯設計實習", "數學"],
-                    ["電子學實習", "電子學", "數位邏輯實習", "電子學", "數學"],
-                    ["電子學實習", "電子學", "週會/聯課活動", "國語文", "英語文"],
-                    ["數學", "數位邏輯設計", "週會/聯課活動", "國語文", "數位邏輯設計"],
-                    ["體育", "國語文", "班會", "數學", "數位邏輯設計"]
-                ]
-            },
-            "電二乙": {
-                tutor: "張琬美",
-                schedule: [
-                    ["機器人控制實習", "數位邏輯實習", "數學", "生物", "電子學"],
-                    ["機器人控制實習", "數位邏輯實習", "體育", "國語文", "電子學"],
-                    ["機器人控制實習", "數位邏輯實習", "英語文", "國語文", "數位邏輯設計"],
-                    ["數學", "國語文", "生物", "數學", "數位邏輯設計"],
-                    ["可程式邏輯設計實習", "電子學實習", "週會/聯課活動", "電子學", "數學"],
-                    ["可程式邏輯設計實習", "電子學實習", "週會/聯課活動", "體育", "應用英文進階"],
-                    ["可程式邏輯設計實習", "電子學實習", "班會", "數位邏輯設計", "英語文"]
-                ]
-            },
-            "烘二甲": {
-                tutor: "李百齡",
-                schedule: [
-                    ["西式點心製作實習", "食品微生物", "中式麵食製作實習", "職涯體驗", "電腦應用"],
-                    ["西式點心製作實習", "食品微生物", "中式麵食製作實習", "食品化學與分析實習", "電腦應用"],
-                    ["西式點心製作實習", "食品化學與分析", "中式麵食製作實習", "食品化學與分析實習", "應用英文"],
-                    ["西式點心製作實習", "食品化學與分析", "中式麵食製作實習", "食品化學與分析實習", "進階體育"],
-                    ["宴會點心製作實習", "進階食品加工", "週會/聯課活動", "食品微生物實習", "歷史"],
-                    ["宴會點心製作實習", "彈性學習", "週會/聯課活動", "食品微生物實習", "應用數學"],
-                    ["宴會點心製作實習", "歷史", "班會", "食品微生物實習", "進階食品加工"]
-                ]
-            },
-            "輪三甲": {
-                tutor: "洪敏發",
-                schedule: [
-                    ["機械力學", "體育", "船舶結構與穩度", "數學", "機械力學"],
-                    ["體育", "動力設備操作實習", "彈性學習", "進階數學", "輪機英文"],
-                    ["自動控制實習", "動力設備操作實習", "機艙資源與團隊管理概論", "專題實作", "機艙資源與團隊管理概論"],
-                    ["自動控制實習", "動力設備拆裝實習", "數學", "專題實作", "船舶結構與穩度"],
-                    ["船舶自動控制實習", "動力設備拆裝實習", "週會/聯課活動", "英語文", "國語文"],
-                    ["船舶自動控制實習", "鍋爐學與實習", "週會/聯課活動", "國語文", "英語文"],
-                    ["船舶自動控制實習", "鍋爐學與實習", "班會", "輪機英文", "應用英文"]
-                ]
-            },
-            "輪三乙": {
-                tutor: "涂乙平",
-                schedule: [
-                    ["機艙資源與團隊管理概論", "機艙資源與團隊管理概論", "國語文", "英語文", "船舶結構與穩度"],
-                    ["動力設備操作實習", "數學", "彈性學習", "應用英文", "進階數學"],
-                    ["動力設備操作實習", "船舶結構與穩度", "專題實作", "自動控制實習", "數學"],
-                    ["動力設備拆裝實習", "英語文", "專題實作", "自動控制實習", "機械力學"],
-                    ["動力設備拆裝實習", "機械力學", "週會/聯課活動", "船舶自動控制實習", "國語文"],
-                    ["鍋爐學與實習", "體育", "週會/聯課活動", "船舶自動控制實習", "體育"],
-                    ["鍋爐學與實習", "輪機英文", "班會", "船舶自動控制實習", "輪機英文"]
-                ]
-            },
-            "食三甲": {
-                tutor: "陳淑華",
-                schedule: [
-                    ["應用英文進階", "英語文", "應用數學", "體育", "進階食品加工實習"],
-                    ["國語文", "應用數學", "彈性學習", "生物", "進階食品加工實習"],
-                    ["國語文", "應用數學", "分析化學", "食品檢驗分析", "進階食品加工實習"],
-                    ["應用數學", "食品安全與衛生", "分析化學", "食品檢驗分析", "進階食品加工實習"],
-                    ["農產加工", "國學常識", "週會/聯課活動", "食品安全與衛生", "食品加工專題實習"],
-                    ["農產加工", "食品網購平台建置", "週會/聯課活動", "英語文", "食品加工專題實習"],
-                    ["食品安全與衛生", "食品網購平台建置", "班會", "進階食品化學與分析", "專題實作"]
-                ]
-            },
-            "食三乙": {
-                tutor: "林家偉",
-                schedule: [
-                    ["進階食品加工實習", "國語文", "食品安全與衛生", "應用數學", "體育"],
-                    ["進階食品加工實習", "國語文", "彈性學習", "食品安全與衛生", "應用英文進階"],
-                    ["進階食品加工實習", "進階食品化學與分析", "分析化學", "食品檢驗分析", "英語文"],
-                    ["進階食品加工實習", "農產加工", "分析化學", "食品檢驗分析", "國學常識"],
-                    ["食品加工專題實習", "食品網購平台建置", "週會/聯課活動", "英語文", "進階食品微生物"],
-                    ["食品加工專題實習", "食品網購平台建置", "週會/聯課活動", "體育", "應用數學"],
-                    ["專題實作", "食品安全與衛生", "班會", "農產加工", "應用數學"]
-                ]
-            },
-            "養三甲": {
-                tutor: "鄭伊惠",
-                schedule: [
-                    ["水族營養飼料學概要", "水族營養飼料學與實習", "公民與社會", "水族工藝實務", "應用英文"],
-                    ["區域特色水族養殖實習", "水族養殖工程概論", "水族營養飼料學與實習", "水族工藝實務", "英語文"],
-                    ["區域特色水族養殖實習", "海洋生態概要", "彈性學習", "水產養殖工程概論", "體育"],
-                    ["區域特色水族養殖實習", "水族景觀設計學", "水族景觀設計學", "水族營養飼料學概要", "應用英文"],
-                    ["水族疾病實習", "應用數學", "週會/聯課活動", "海事生態概要", "英語文"],
-                    ["水族疾病實習", "國語文", "週會/聯課活動", "公民與社會", "體育"],
-                    ["應用數學", "國語文", "班會", "應用數學", "國學常識"]
-                ]
-            },
-            "家三甲": {
-                tutor: "陳曉慧",
-                schedule: [
-                    ["服裝設計實務", "家政美學", "幼兒教保概論", "服飾工藝", "點心製作"],
-                    ["服裝設計實務", "家政美學", "彈性學習", "服飾工藝", "點心製作"],
-                    ["英語文", "體育", "餐飲服務技術", "專題實作", "點心製作"],
-                    ["體育", "數學", "餐飲服務技術", "專題實作", "點心製作"],
-                    ["國語文", "國學常識", "週會/聯課活動", "行銷與服務", "宴會膳食"],
-                    ["國語文", "英語文", "週會/聯課活動", "觀光日文", "宴會膳食"],
-                    ["數學", "行銷與服務", "班會", "觀光日文", "幼兒教保概論"]
-                ]
-            },
-            "管三甲": {
-                tutor: "梁有德",
-                schedule: [
-                    ["電腦軟體應用", "會計學應用", "國語文", "英語文", "應用數學"],
-                    ["電腦軟體應用", "會計學應用", "彈性學習", "應用數學", "應用數學"],
-                    ["體育", "金融與證券投資實務", "食品行銷學", "會計學應用", "專題實作"],
-                    ["英語文", "金融與證券投資實務", "食品行銷學", "經濟學分析", "專題實作"],
-                    ["應用數學", "商業軟體應用", "週會/聯課活動", "計算機實務", "國際貿易實務"],
-                    ["航業經營", "商業軟體應用", "週會/聯課活動", "計算機實務", "國際貿易實務"],
-                    ["航業經營", "航業英文", "班會", "體育", "國語文"]
-                ]
-            },
-            "管三乙": {
-                tutor: "伍喜喬",
-                schedule: [
-                    ["應用數學", "金融與證券投資實務", "國語文", "商業軟體應用", "體育"],
-                    ["應用數學", "金融與證券投資實務", "彈性學習", "商業軟體應用", "計算機實務"],
-                    ["電腦軟體應用", "應用數學", "食品經營", "經濟學分析", "計算機實務"],
-                    ["電腦軟體應用", "國際貿易實務", "食品經營", "英語文", "應用數學"],
-                    ["國際貿易實務", "體育", "週會/聯課活動", "會計學應用", "專題實作"],
-                    ["國際貿易實務", "航業英文", "週會/聯課活動", "會計學應用", "專題實作"],
-                    ["國語文", "會計學應用", "班會", "航業經營", "英語文"]
-                ]
-            },
-            "電三甲": {
-                tutor: "謝秀宏",
-                schedule: [
-                    ["介面電路控制實習", "電子電路實習", "彈性學習", "計算機應用", "微電腦應用實習"],
-                    ["介面電路控制實習", "電子電路實習", "彈性學習", "計算機應用", "微電腦應用實習"],
-                    ["介面電路控制實習", "電子電路實習", "國語文", "專題實作", "微電腦應用實習"],
-                    ["數位電路", "數學精讀", "國語文", "專題實作", "英語文"],
-                    ["應用英文進階", "英語文", "週會/聯課活動", "數位電路", "電子電路"],
-                    ["數學精讀", "體育", "週會/聯課活動", "電子電路", "電子電路"],
-                    ["體育", "國學常識", "班會", "基本電學進階", "基本電學進階"]
-                ]
-            }
-        };
+        let currentDayIdx = new Date().getDay() - 1;
+        let currentPeriodObj = null;
 
-        // 初始化選單
-        function initSelectOptions() {
-            const select = document.getElementById("classSelect");
-            select.innerHTML = "";
-            for (let className in scheduleData) {
-                let option = document.createElement("option");
-                option.value = className;
-                option.textContent = `${className} (${scheduleData[className].tutor})`;
-                select.appendChild(option);
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+            
+            if (tabId === 'settingsTab') renderLogsAndTimeEditor();
+        }
+
+        // 時鐘與即時進行課程高亮
+        function updateClock() {
+            const now = new Date();
+            document.getElementById("clock").textContent = `系統時間：${now.toTimeString().split(' ')[0]}`;
+
+            const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            currentPeriodObj = null;
+            let statusText = "非作息時間 / 放學";
+
+            for (let item of timeSchedule) {
+                if (currentTime >= item.start && currentTime < item.end) {
+                    currentPeriodObj = item;
+                    statusText = (item.type === 'period') ? `目前：第 ${item.period} 節 (${item.start}~${item.end})` : `目前：${item.name} (${item.start}~${item.end})`;
+                    break;
+                }
             }
+            document.getElementById("currentPeriodText").textContent = statusText;
             renderSchedule();
         }
 
-        // 搜尋過濾班級
-        function filterClasses() {
-            const input = document.getElementById("searchInput").value.toLowerCase();
-            const select = document.getElementById("classSelect");
-            let firstMatch = null;
+        function populateSelects() {
+            const selects = [document.getElementById("classSelect"), document.getElementById("swapClassA"), document.getElementById("swapClassB")];
+            selects.forEach(s => s.innerHTML = "");
 
-            for (let i = 0; i < select.options.length; i++) {
-                const text = select.options[i].textContent.toLowerCase();
-                if (text.includes(input)) {
-                    select.options[i].style.display = "";
-                    if (!firstMatch) firstMatch = select.options[i].value;
-                } else {
-                    select.options[i].style.display = "none";
-                }
-            }
-
-            if (firstMatch) {
-                select.value = firstMatch;
-                renderSchedule();
+            for (let className in scheduleData) {
+                selects.forEach(s => {
+                    let opt = document.createElement("option");
+                    opt.value = className;
+                    opt.textContent = `${className} (${scheduleData[className].tutor})`;
+                    s.appendChild(opt.cloneNode(true));
+                });
             }
         }
 
-        // 繪製課表（電腦版表格 + 手機版卡片）
         function renderSchedule() {
             const className = document.getElementById("classSelect").value;
             const data = scheduleData[className];
@@ -633,57 +269,125 @@
             document.getElementById("currentClassName").textContent = className;
             document.getElementById("currentTutor").textContent = `導師：${data.tutor}`;
 
-            // 1. 繪製電腦版表格
             const tableBody = document.getElementById("tableBody");
             tableBody.innerHTML = "";
-            for (let period = 0; period < 7; period++) {
+
+            // 結合作息時間表與課表繪製[span_2](start_span)[span_2](end_span)
+            timeSchedule.forEach((item) => {
                 let tr = document.createElement("tr");
+                let isCurrentPeriod = (currentPeriodObj && currentPeriodObj.name === item.name);
+                if (isCurrentPeriod) tr.className = "active-row";
+
                 let tdPeriod = document.createElement("td");
                 tdPeriod.className = "period";
-                tdPeriod.textContent = `第 ${period + 1} 節`;
+                let periodTitle = item.type === 'period' ? `第 ${item.period} 節` : item.name;
+                tdPeriod.innerHTML = `${periodTitle} ${isCurrentPeriod ? '<span class="active-tag">進行中</span>' : ''}<span class="time-badge">${item.start} ~ ${item.end}</span>`;
                 tr.appendChild(tdPeriod);
 
-                for (let day = 0; day < 5; day++) {
-                    let td = document.createElement("td");
-                    td.textContent = data.schedule[period][day] || "-";
-                    tr.appendChild(td);
+                if (item.type === 'event') {
+                    let tdEvent = document.createElement("td");
+                    tdEvent.colSpan = 5;
+                    tdEvent.textContent = item.name;
+                    tdEvent.style.color = "#6c757d";
+                    tr.appendChild(tdEvent);
+                } else {
+                    for (let day = 0; day < 5; day++) {
+                        let td = document.createElement("td");
+                        let subject = data.schedule[item.period - 1][day] || "-";
+                        td.textContent = subject;
+
+                        if (isCurrentPeriod && day === currentDayIdx) {
+                            td.className = "active-cell";
+                            td.innerHTML = `${subject} <br><span class="active-tag">上課中</span>`;
+                        }
+                        tr.appendChild(td);
+                    }
                 }
                 tableBody.appendChild(tr);
-            }
+            });
+        }
 
-            // 2. 繪製手機版卡片
-            const mobileList = document.getElementById("mobileList");
-            mobileList.innerHTML = "";
-            const daysText = ["星期一", "星期二", "星期三", "星期四", "星期五"];
+        // 調課提交
+        function handleSwapSubmit() {
+            const classA = document.getElementById("swapClassA").value;
+            const dayA = parseInt(document.getElementById("swapDayA").value);
+            const periodA = parseInt(document.getElementById("swapPeriodA").value);
 
-            for (let day = 0; day < 5; day++) {
-                let dayCard = document.createElement("div");
-                dayCard.className = "day-card";
+            const classB = document.getElementById("swapClassB").value;
+            const dayB = parseInt(document.getElementById("swapDayB").value);
+            const periodB = parseInt(document.getElementById("swapPeriodB").value);
 
-                let dayTitle = document.createElement("div");
-                dayTitle.className = "day-title";
-                dayTitle.textContent = daysText[day];
-                dayCard.appendChild(dayTitle);
+            const reason = document.getElementById("swapReason").value || "教務處調課";
 
-                let periodList = document.createElement("ul");
-                periodList.className = "period-list";
-
-                for (let period = 0; period < 7; period++) {
-                    let item = document.createElement("li");
-                    item.className = "period-item";
-                    
-                    let subject = data.schedule[period][day] || "-";
-                    item.innerHTML = `<span class="period-num">第 ${period + 1} 節</span><span>${subject}</span>`;
-                    periodList.appendChild(item);
-                }
-
-                dayCard.appendChild(periodList);
-                mobileList.appendChild(dayCard);
+            if (swapLessons(classA, dayA, periodA, classB, dayB, periodB, reason)) {
+                alert("調課成功！已記錄至調課日誌中。");
+                renderSchedule();
+            } else {
+                alert("調課失敗，請檢查輸入欄位。");
             }
         }
 
-        // 初始化頁面
-        window.onload = initSelectOptions;
+        // 班級新建/修改
+        function handleClassSubmit() {
+            const name = document.getElementById("newClassName").value.trim();
+            const tutor = document.getElementById("newTutorName").value.trim();
+            if (!name || !tutor) { alert("請填寫班級名稱與導師姓名"); return; }
+
+            addOrUpdateClass(name, tutor);
+            populateSelects();
+            alert(`班級 [${name}] 設定成功！`);
+        }
+
+        // 渲染調課日誌與作息時間表編輯器
+        function renderLogsAndTimeEditor() {
+            // 1. 調課日誌
+            const logContainer = document.getElementById("logListContainer");
+            logContainer.innerHTML = swapLogs.length === 0 ? "<li class='log-item'>尚無調課紀錄</li>" : "";
+            swapLogs.forEach(log => {
+                let li = document.createElement("li");
+                li.className = "log-item";
+                li.innerHTML = `<div><strong>${log.detail}</strong></div><div class="log-time">事由：${log.reason} | 時間：${log.timestamp}</div>`;
+                logContainer.appendChild(li);
+            });
+
+            // 2. 作息編輯
+            const timeContainer = document.getElementById("timeScheduleEditor");
+            timeContainer.innerHTML = "";
+            timeSchedule.forEach((item, idx) => {
+                let div = document.createElement("div");
+                div.className = "form-group";
+                let name = item.type === 'period' ? `第 ${item.period} 節` : item.name;
+                div.innerHTML = `
+                    <label>${name}：</label>
+                    <input type="time" value="${item.start}" id="start_${idx}"> ~
+                    <input type="time" value="${item.end}" id="end_${idx}">
+                    <button class="btn-primary" style="padding: 4px 10px;" onclick="saveTimeItem(${idx})">儲存</button>
+                `;
+                timeContainer.appendChild(div);
+            });
+        }
+
+        function saveTimeItem(idx) {
+            const newStart = document.getElementById(`start_${idx}`).value;
+            const newEnd = document.getElementById(`end_${idx}`).value;
+            updateTimeSchedule(idx, newStart, newEnd);
+            alert("作息時間已更新！");
+            updateClock();
+        }
+
+        function filterClasses() {
+            const input = document.getElementById("searchInput").value.toLowerCase();
+            const select = document.getElementById("classSelect");
+            for (let option of select.options) {
+                option.style.display = option.textContent.toLowerCase().includes(input) ? "" : "none";
+            }
+        }
+
+        window.onload = function() {
+            populateSelects();
+            updateClock();
+            setInterval(updateClock, 10000);
+        };
     </script>
 </body>
 </html>
