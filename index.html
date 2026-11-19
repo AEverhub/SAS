@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="梁山行動">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%E6%A2%81%E5%B1%B1%E8%A1%8C%E5%8B%95%22%2C%22short_name%22%3A%22%E6%A2%81%E5%B1%B1%E8%A1%8C%E5%8B%95%22%2C%22display%22%3A%22fullscreen%22%2C%22orientation%22%3A%22landscape%22%2C%22background_color%22%3A%22%2307090c%22%2C%22theme_color%22%3A%22%2307090c%22%2C%22start_url%22%3A%22.%22%7D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#07090c">
 <title>梁山行動 — 上海救援</title>
@@ -144,8 +146,14 @@ input,select{font-family:inherit;user-select:text;-webkit-user-select:text}
 
 /* touch controls：圓形圖示按鍵 */
 #touch{position:absolute;inset:0;pointer-events:none}
-#joyzone{position:absolute;left:0;top:30vh;width:44vw;bottom:0;pointer-events:auto}
-#lookzone{position:absolute;left:44vw;top:9vh;right:0;bottom:0;pointer-events:auto}
+#joyzone{position:absolute;left:0;top:50vh;width:50vw;bottom:0;pointer-events:auto;z-index:1}
+#lookzone{position:absolute;inset:0;pointer-events:auto;z-index:0}
+#touch .tb{z-index:2}
+#touch{z-index:1}
+#mini,#tr{z-index:3}
+#bl{pointer-events:none!important}
+#bigmap{z-index:6!important}
+#mini{cursor:pointer}
 #joy{position:absolute;width:24vh;height:24vh;border-radius:50%;border:2px solid rgba(255,255,255,.35);background:radial-gradient(circle,rgba(255,255,255,.04),rgba(255,255,255,.12));pointer-events:none}
 #joy i{position:absolute;left:50%;top:50%;width:42%;height:42%;transform:translate(-50%,-50%);border-radius:50%;background:rgba(255,255,255,.4);box-shadow:0 0 8px rgba(0,0,0,.5);margin:0}
 #joy i{left:29%;top:29%;transform:none}
@@ -191,6 +199,16 @@ body.editing #hud>*:not(#editor){visibility:hidden}
 .diff button.on{background:#e9d79e;color:#15181b;font-weight:700}
 .diff button[data-d="2"].on{background:#e0634f;color:#fff}
 .diff small{font-size:1.6vh;color:#9aa6ae;max-width:13vw;white-space:normal;line-height:1.2}
+#stb{flex:1;height:1.1vh;background:rgba(0,0,0,.55);border-radius:1vh;overflow:hidden;border:1px solid rgba(255,255,255,.2)}
+#stF{height:100%;width:100%;background:linear-gradient(90deg,#c9a23a,#f0dc8a);transition:width .1s linear}
+#stb.lo #stF{background:linear-gradient(90deg,#c96a2a,#e0a050)}
+#stb.ex #stF{background:#c9463a}#stb.ex{animation:blink .8s steps(2) infinite}
+.srow{display:flex;align-items:center;gap:.5vw;margin-top:.5vh;font-size:1.6vh;color:#e6d9a8}
+#fsBtn{position:fixed;right:1.2vw;top:1.4vh;z-index:60;width:6.5vh;height:6.5vh;border-radius:50%;background:rgba(10,14,18,.65);border:1px solid rgba(255,255,255,.35);color:#e9d79e;display:flex;align-items:center;justify-content:center}
+#rotate .btn{font-size:20px;padding:14px 26px;letter-spacing:.1em}
+#rotate small{font-size:13px;color:#9aa6ae;max-width:80vw;line-height:1.6}
+body.inplay #fsBtn{top:10.5vh;right:1.2vw}
+#bigmap .mclose{position:absolute;bottom:2vh;left:50%;transform:translateX(-50%);font-size:2vh;color:#aab4bb}
 
 </style>
 </head>
@@ -245,6 +263,7 @@ body.editing #hud>*:not(#editor){visibility:hidden}
 <div id="help" class="layer modal hidden"><div class="box">
   <h2>設定與說明</h2>
   <div class="row"><label class="opt">靈敏度<input id="sens" type="range" min="0.3" max="2.5" step="0.1" value="1"></label>
+  <label class="opt"><input id="voice" type="checkbox" checked style="width:2.4vh;height:2.4vh"> 語音（敵人說普通話、我方說台語）</label>
   <label class="opt">畫質<select id="qual"><option value="0">流暢（低階手機）</option><option value="1" selected>標準</option><option value="2">精細</option></select></label></div>
   <p class="keys"><b>觸控</b>：左下拖曳＝移動（推到底＝衝刺）｜右半邊拖曳＝轉視角｜按住「開火」＝扣扳機，按住同時拖曳可邊瞄邊射（左右各一顆開火鍵）<br>
   跳／蹲／趴／左探頭／右探頭／瞄準／換彈／換槍／互動 皆為圓形圖示按鍵，可在「按鍵配置」中拖曳位置、調整大小；空中按「跳」開傘<br>
@@ -282,12 +301,12 @@ body.editing #hud>*:not(#editor){visibility:hidden}
   <div id="chuteTip" class="hidden"></div>
   <div id="marks"></div>
   <div id="bl">
-    <div id="hpw"><div class="t"><span id="stance">站立</span><span id="hpT">100</span></div><div id="hpb"><div id="hpF"></div></div></div>
+    <div id="hpw"><div class="t"><span id="stance">站立</span><span id="hpT">100</span></div><div id="hpb"><div id="hpF"></div></div><div class="srow"><span>體力</span><div id="stb"><div id="stF"></div></div></div></div>
     <div id="wp"><div id="wpN"></div><b><span id="ammo">30</span><small> / <span id="res">240</span></small></b></div>
   </div>
   <div id="idtag" class="hidden"></div>
   <div id="touch"><div id="joyzone"></div><div id="lookzone"></div><div id="joy"><i></i></div></div>
-  <div id="bigmap"><canvas id="bigc"></canvas></div>
+  <div id="bigmap"><canvas id="bigc"></canvas><div class="mclose">點任意處關閉地圖</div></div>
 </div>
 
 <div id="talk" class="layer modal hidden"><div class="tbox">
@@ -303,7 +322,9 @@ body.editing #hud>*:not(#editor){visibility:hidden}
 
 <div id="cine" class="layer hidden"><canvas id="cinec"></canvas><div id="cineH"></div><div id="cineT"></div><div class="skip">點擊略過</div></div>
 
-<div id="rotate" class="layer"><div class="ph"></div><div>請將手機<b>橫放</b>進行遊戲</div></div>
+<button id="fsBtn" class="hidden" title="全螢幕"><svg viewBox="0 0 24 24" width="60%" height="60%" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+
+<div id="rotate" class="layer"><div class="ph"></div><div>本遊戲需橫向遊玩</div><button class="btn go" id="rotBtn">全螢幕橫向遊玩</button><small id="rotSub">按下後會自動進入全螢幕並轉成橫向</small></div>
 
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js';
@@ -1550,7 +1571,7 @@ function newPlayer() {
   return { x: 0, y: 0, z: 0, vx: 0, vz: 0, vy: 0, yaw: 0, pitch: 0, stance: 0, eye: EYE[0], hp: 100, alive: true, down: false, bleed: 0, onGround: false, air: null, chute: null,
     wp: [mk(LOAD.p), mk(LOAD.s)], cur: 0, fireT: 0, reloadT: 0, rlTotal: 0, swapT: 0, burst: 0, semiLock: false, cycleT: 0,
     adsK: 0, zoomNow: 1, rp: 0, ry: 0, kick: 0, spreadK: 0, lean: 0, leanReal: 0, lastHurt: -99, lastShot: -99, hostage: null, vehicle: null, fallStart: 0, moving: 0, sprinting: false,
-    act: null, actT: 0, swim: false, light: false, stepT: 0, medkits: 1 };
+    act: null, actT: 0, swim: false, light: false, stepT: 0, medkits: 1, sta: 100, staT: -9, exhausted: false, breathT: 0 };
 }
 const curW = () => P.wp[P.cur];
 // 第一人稱武器
@@ -1599,7 +1620,7 @@ function playerMove(dt) {
   if (took('prone')) setStance(P.stance === 2 ? 0 : 2);
   if (took('jump')) {
     if (P.air === 'fall') openChute();
-    else if (!P.air && P.onGround && !P.swim) { if (P.stance) setStance(0); else if (!P.hostage) { P.vy = 5.2; P.onGround = false; P.fallStart = P.y; } }
+    else if (!P.air && P.onGround && !P.swim) { if (P.stance) setStance(0); else if (!P.hostage) { if (P.sta < 12) feed('體力不足，跳不起來', 'info'); else { P.vy = 5.2; P.onGround = false; P.fallStart = P.y; P.sta -= 12; P.staT = G.t; } } }
   }
   const fwx = -Math.sin(P.yaw), fwz = -Math.cos(P.yaw), rx = -fwz, rz = fwx;
   let ix = In.mx, iz = In.mz; const il = hyp(ix, iz); if (il > 1) { ix /= il; iz /= il; }
@@ -1620,7 +1641,7 @@ function playerMove(dt) {
   }
   // 地面
   let spd = [4.0, 2.0, .85][P.stance] * st.wt;
-  P.sprinting = In.sprint && P.stance === 0 && iz > .5 && P.adsK < .3 && !P.hostage && P.reloadT <= 0 && !P.swim;
+  P.sprinting = In.sprint && P.stance === 0 && iz > .5 && P.adsK < .3 && !P.hostage && P.reloadT <= 0 && !P.swim && !P.exhausted && P.sta > 0;
   if (P.sprinting) spd *= 1.6;
   if (P.adsK > .5) spd *= .6; if (P.hostage) spd *= .55; if (P.swim) spd = 1.6;
   const tx = (fwx * iz + rx * ix) * spd, tz = (fwz * iz + rz * ix) * spd, acc = P.onGround ? 14 : 3;
@@ -1634,6 +1655,14 @@ function playerMove(dt) {
     if (P.y <= gh) { const fall = P.fallStart - gh; if (!P.onGround && fall > 5.5) { hurtPlayer((fall - 5.5) * 14, null, '墜落'); } P.y = gh; P.vy = 0; P.onGround = true; P.fallStart = gh; }
   }
   P.moving = hyp(P.vx, P.vz);
+  // 體力
+  if (P.sprinting && P.moving > 2) { P.sta -= 13 * dt; P.staT = G.t; }
+  else if (P.swim) { P.sta -= 3 * dt; P.staT = G.t; }
+  else if (G.t - P.staT > .9) P.sta += (P.moving > .5 ? 9 : 17) * [1, 1.35, 1.6][P.stance] * dt;
+  P.sta = clamp(P.sta, 0, 100);
+  if (P.sta <= 0 && !P.exhausted) { P.exhausted = true; feed('體力耗盡 — 先喘口氣', 'info'); }
+  if (P.exhausted && P.sta >= 35) P.exhausted = false;
+  if (P.sta < 30) { P.breathT -= dt; if (P.breathT < 0) { P.breathT = P.exhausted ? 1.1 : 1.7; Snd._n(.55, 650, .7, P.exhausted ? .14 : .07, 0, 'bandpass'); } }
   if (P.onGround && P.moving > .5) { P.stepT -= dt * P.moving * (P.sprinting ? .45 : .38); if (P.stepT < 0) { P.stepT = 1; Snd.step(P.stance ? .4 : P.sprinting ? 1.2 : .8); if (P.sprinting) makeNoise(P.x, P.z, 12, 'step'); } }
   // 探頭
   const lt = In.leanL ? -1 : In.leanR ? 1 : 0; P.lean = lerp(P.lean, P.swim || P.stance === 2 ? 0 : lt, dt * 9);
@@ -1645,7 +1674,7 @@ function land() {
   const hard = P.air === 'fall'; P.air = null; P.chuteMesh.visible = false; P.vy = 0; P.onGround = true; P.vx *= .2; P.vz *= .2; P.fallStart = P.y;
   $('chuteTip').classList.add('hidden'); Snd.setWind(0);
   if (hard) hurtPlayer(100, null, '未開傘');
-  else { feed(P.y > 3 ? '降落在屋頂 — 靠近邊緣可「垂降」到地面' : '著陸 — 開始任務', 'info'); makeNoise(P.x, P.z, 10, 'land'); if (G.diff === 0 && !P.gotDrop) { P.gotDrop = true; setTimeout(() => airdrop(P.x, P.z), 1200); } }
+  else { feed(P.y > 3 ? '降落在屋頂 — 靠近邊緣可「垂降」到地面' : '著陸 — 開始任務', 'info'); makeNoise(P.x, P.z, 10, 'land'); setTimeout(() => sayT('land'), 600); if (G.diff === 0 && !P.gotDrop) { P.gotDrop = true; setTimeout(() => airdrop(P.x, P.z), 1200); } }
 }
 // 視角
 function playerLook(dt) {
@@ -1662,7 +1691,8 @@ function playerLook(dt) {
   const fwx = -Math.sin(P.yaw), fwz = -Math.cos(P.yaw), rx = -fwz, rz = fwx;
   const lo = P.leanReal * .42;
   camera.position.set(P.x + rx * lo, P.y + P.eye - Math.abs(P.leanReal) * .08, P.z + rz * lo);
-  camera.rotation.set(P.pitch + P.rp, P.yaw + P.ry, -P.leanReal * .2);
+  const tired = (1 - P.sta / 100) * .0055 + (P.exhausted ? .006 : 0) + (W_.w.c === 'SR' ? .0012 : 0), sw = tired * P.adsK * (P.stance === 2 ? .45 : P.stance === 1 ? .75 : 1);
+  camera.rotation.set(P.pitch + P.rp + Math.sin(G.t * 1.9) * sw, P.yaw + P.ry + Math.sin(G.t * 1.1 + 1) * sw * 1.4, -P.leanReal * .2);
 }
 // 開火
 function tryFire(dt) {
@@ -1688,6 +1718,7 @@ function shoot() {
   const bip = st.bipod && P.stance > 0;
   let spread = st.sp * (P.adsK > .6 ? (w.c === 'SR' ? .03 : w.c === 'SG' ? .75 : .16) : st.hip) * [1, .8, .6][P.stance] * (1 + P.moving * .22) * (P.onGround ? 1 : 3) * (bip ? .55 : 1) * (1 + P.spreadK);
   if (P.hostage) spread *= 1.5;
+  spread *= 1 + (1 - P.sta / 100) * .4 + (P.exhausted ? .4 : 0);
   const sr = spread * Math.PI / 180;
   const ox = camera.position.x, oy = camera.position.y, oz = camera.position.z;
   let hitAny = false, killed = false;
@@ -1705,13 +1736,13 @@ function shoot() {
   P.spreadK = Math.min(1.5, P.spreadK + .12 * rk); VM.kz = Math.min(.09, VM.kz + .03 * rk); VM.kr = Math.min(.25, VM.kr + .06 * rk);
   VM.flashT = st.sup ? .03 : .06;
   const kind = st.sup ? 'sup' : w.c === 'HG' ? 'pistol' : w.c === 'SG' ? 'shotgun' : w.c === 'SMG' ? 'smg' : (w.c === 'SR' || w.c === 'LMG' || w.cal.startsWith('7.62') || w.cal.startsWith('12.7')) ? 'heavy' : 'rifle';
-  Snd.shot(kind, 1);
+  Snd.shot(kind, 1); if (w.mode !== 'bolt' && w.mode !== 'pump' && Math.random() < .5) Snd.casing();
   makeNoise(P.x, P.z, st.noise, 'shot');
   Net.send({ t: 'fx', k: 'shot', x: ox, y: oy, z: oz, dx: _dir.x, dy: _dir.y, dz: _dir.z, s: st.sup ? 1 : 0 });
 }
 function startReload() {
   const W_ = curW(); if (P.reloadT > 0 || W_.ammo >= W_.st.mag || W_.res <= 0 || P.vehicle) return;
-  P.rlTotal = P.reloadT = W_.st.rl * (W_.ammo === 0 ? 1.15 : 1); In.ads = false; Snd.reload(); P.burst = 0;
+  P.rlTotal = P.reloadT = W_.st.rl * (W_.ammo === 0 ? 1.15 : 1); In.ads = false; Snd.reload(); P.burst = 0; if (Math.random() < .5) sayT('reload', { cd: 10 });
 }
 function finishReload() { const W_ = curW(), n = Math.min(W_.st.mag - W_.ammo, W_.res); W_.ammo += n; W_.res -= n; }
 function swapWeapon(i) {
@@ -1744,7 +1775,7 @@ function updateViewmodel(dt) {
 }
 function hurtPlayer(d, from, why) {
   if (!P.alive || P.down || G.state !== 'play') return;
-  d *= P.vehicle ? .5 : .78; P.hp -= d; P.lastHurt = G.t; Snd.hurt(); $('hurt').style.opacity = Math.min(1, .35 + d / 40);
+  d *= P.vehicle ? .5 : .78; P.hp -= d; if (d > 12) sayT('hurt', { cd: 14, pri: 2 }); P.lastHurt = G.t; Snd.hurt(); $('hurt').style.opacity = Math.min(1, .35 + d / 40);
   if (from) { const a = angDiff(yawTo(from.x - P.x, from.z - P.z), P.yaw); const el = $('arcD'); el.style.transform = `rotate(${-a}rad)`; el.style.opacity = 1; el.dataset.t = G.t; }
   if (P.hp <= 0) { P.hp = 0; playerDown(why || '陣亡'); }
 }
@@ -1856,7 +1887,7 @@ function makeNoise(x, z, r, type) {
       if (a.st === 'combat') continue;
       if (type === 'shot' || type === 'kick' || type === 'crash' || d < r * .4) { a.alert = Math.max(a.alert, type === 'shot' ? .75 : .55); a.st = 'sus'; a.seen = { x, z, t: G.t }; a.path = null; }
     } else if (a.k === 'civ' && (type === 'shot' || type === 'kick' || type === 'crash') && a.st !== 'hostage' && a.st !== 'tied') {
-      if (a.st !== 'report' && a.st !== 'flee') { a.st = 'flee'; a.fleeFrom = { x, z }; a.t0 = G.t; }
+      if (a.st !== 'report' && a.st !== 'flee') { a.st = 'flee'; a.fleeFrom = { x, z }; a.t0 = G.t; if (Math.random() < .4) sayL('civ_flee', a, { cd: 6 }); }
       if (type === 'shot' && d < r * .6 && !a.called && Math.random() < .5) { a.st = 'report'; a.t0 = G.t; a.rep = { x, z, why: '聽到槍聲' }; }
     }
   }
@@ -1914,7 +1945,7 @@ function applyHit(a, dmg, zone, by, dx, dz) {
   if (zone === 'head') a.vital += dmg * 4; else if (zone === 'torso') a.vital += dmg; else a.limb += dmg * .7;
   a.lastHitBy = by;
   if (a.vital + a.limb >= 100 || (a.down && a.vital >= 55)) { downActor(a, a.vital >= 55 ? 'dead' : 'wounded', by); return a.down === 'dead'; }
-  if (a.k === 'pla' && !a.down) { a.st = 'combat'; a.alert = 1; a.tgtId = by; a.combatT = Math.max(a.combatT, 1.5); const p = allPlayers().find(q => q.id === by) || allPlayers()[0]; if (p) a.seen = { x: p.x, z: p.z, t: G.t }; alertNear(a, 30); }
+  if (a.k === 'pla' && !a.down) { if (Math.random() < .5) sayL('pla_hit', a, { cd: 3, pri: 2 }); a.st = 'combat'; a.alert = 1; a.tgtId = by; a.combatT = Math.max(a.combatT, 1.5); const p = allPlayers().find(q => q.id === by) || allPlayers()[0]; if (p) a.seen = { x: p.x, z: p.z, t: G.t }; alertNear(a, 30); }
   if (a.k === 'civ' && !a.down && a.st !== 'hostage') { a.st = 'flee'; a.fleeFrom = { x: a.x - (dx || 0) * 10, z: a.z - (dz || 0) * 10 }; a.t0 = G.t; }
   if (a.k === 'vip') { a.hp = 100 - a.vital - a.limb; }
   return false;
@@ -1959,13 +1990,13 @@ function enemyThink(a, dt, players) {
   for (const p of players) { const v = canSee(a, p, range * Math.min(1.8, visMul(p)), fov); if (v > bv) { bv = v; best = p; } }
   if (best) {
     a.seen = { x: best.x, z: best.z, t: G.t }; a.tgtId = best.id;
-    if (a.st !== 'combat') { a.alert += dt * (.35 + bv * 2.2) * (a.st === 'search' ? 2 : 1); if (a.alert >= 1) { a.st = 'combat'; a.combatT = 0; shout(a); alertNear(a, 40); } else if (a.alert > .3 && a.st !== 'sus' && a.st !== 'search') { a.st = 'sus'; a.path = null; } }
+    if (a.st !== 'combat') { a.alert += dt * (.35 + bv * 2.2) * (a.st === 'search' ? 2 : 1); if (a.alert >= 1) { a.st = 'combat'; a.combatT = 0; shout(a); alertNear(a, 40); } else if (a.alert > .3 && a.st !== 'sus' && a.st !== 'search') { a.st = 'sus'; a.path = null; sayL('pla_sus', a, { cd: 8 }); } }
   } else if (a.st !== 'combat') a.alert = Math.max(0, a.alert - dt * .05);
   a.vis = best;
   // 發現倒下的同袍
-  if (!best && a.st !== 'combat' && (a.bodyT = (a.bodyT || 0) - dt) < 0) { a.bodyT = 1; for (const b of A.list) if (b.k === 'pla' && b.down && !b.found && hyp(b.x - a.x, b.z - a.z) < 22 && los(a.x, a.y + 1.6, a.z, b.x, b.y + .3, b.z)) { b.found = true; a.st = 'search'; a.alert = Math.max(a.alert, .75); a.seen = { x: b.x, z: b.z, t: G.t }; a.path = null; feed(`${a.id_.rank} ${a.id_.name} 發現了倒下的 ${b.id_.name}`, 'bad'); alertNear(a, 60); if (Math.random() < .5) raiseAlarm(b.x, b.z, '巡邏兵發現倒下的同袍'); break; } }
+  if (!best && a.st !== 'combat' && (a.bodyT = (a.bodyT || 0) - dt) < 0) { a.bodyT = 1; for (const b of A.list) if (b.k === 'pla' && b.down && !b.found && hyp(b.x - a.x, b.z - a.z) < 22 && los(a.x, a.y + 1.6, a.z, b.x, b.y + .3, b.z)) { b.found = true; sayL('pla_body', a, { pri: 2 }); a.st = 'search'; a.alert = Math.max(a.alert, .75); a.seen = { x: b.x, z: b.z, t: G.t }; a.path = null; feed(`${a.id_.rank} ${a.id_.name} 發現了倒下的 ${b.id_.name}`, 'bad'); alertNear(a, 60); if (Math.random() < .5) raiseAlarm(b.x, b.z, '巡邏兵發現倒下的同袍'); break; } }
 }
-function shout(a) { if (!a.shouted && G.t - (G.shoutT || -9) > 4) { G.shoutT = G.t; a.shouted = 1; feed(`${a.id_.rank} ${a.id_.name}：「發現敵人！」`, 'bad'); } }
+function shout(a) { sayL('pla_spot', a, { pri: 2, cd: 4 }); if (!a.shouted && G.t - (G.shoutT || -9) > 4) { G.shoutT = G.t; a.shouted = 1; feed(`${a.id_.rank} ${a.id_.name}：「發現敵人！」`, 'bad'); } }
 function enemyAct(a, dt, players) {
   const run = 3.9, walk = 1.45; a.sp = 0;
   if (a.st === 'combat') {
@@ -1990,6 +2021,7 @@ function enemyAct(a, dt, players) {
     const s = a.seen; if (!s) { a.st = 'return'; return; }
     if (a.vis && a.st === 'sus') { a.yaw = turnTo(a.yaw, yawTo(a.vis.x - a.x, a.vis.z - a.z), dt * 3); setSign(a, '?', '#ffd24a'); return; }
     if (!a.path) goTo(a, s.x + rnd(-6, 6), s.z + rnd(-6, 6));
+    if (a.st === 'search' && Math.random() < dt * .08) sayL('pla_search', a, { cd: 12 });
     if (moveAlong(a, dt, a.st === 'search' ? run * .7 : walk)) { a.lookT = (a.lookT || 0) + dt; a.yaw += Math.sin(G.t * 1.3 + a.id) * dt; if (a.lookT > 6) { a.lookT = 0; if (G.alarmT > 0 && Math.random() < .6) { a.seen = { x: s.x + rnd(-40, 40), z: s.z + rnd(-40, 40), t: G.t }; a.path = null; } else { a.st = 'return'; a.path = null; a.alert = .2; } } }
     setSign(a, '?', a.st === 'search' ? '#ff9a3a' : '#ffd24a', .8); return;
   }
@@ -2003,7 +2035,7 @@ function enemyShoot(a, dt, p, d) {
   const nw = NW[a.wp]; a.shotT -= dt; if (a.shotT > 0) return;
   if (a.burst <= 0) { a.burst = rndi(nw.burst[0], nw.burst[1]); a.shotT = nw.snp ? rnd(2.2, 4) : rnd(.5, 1.5) * (1.4 - a.cf * .5); if (a.combatT < .7) a.shotT += .6; return; }
   a.burst--; a.shotT = 60 / nw.rpm;
-  if (p.hostage && Math.random() < .7) { a.burst = 0; a.shotT = rnd(1.5, 3); if (Math.random() < .3) feed(`${a.id_.name}：「放開人質！」`, 'bad'); return; }
+  if (p.hostage && Math.random() < .7) { sayL('pla_hostage', a, { pri: 2, cd: 5 }); a.burst = 0; a.shotT = rnd(1.5, 3); if (Math.random() < .3) feed(`${a.id_.name}：「放開人質！」`, 'bad'); return; }
   // 隨機數命中：越接近市中心的部隊越準
   let ph = (.07 + .38 * a.cf + (G.diff === 2 ? .08 : G.diff === 0 ? -.03 : 0)) * (nw.snp ? clamp(1.15 - d / 380, .45, 1.05) : clamp(1.25 - d / 85, .18, 1.1)) * [1, .75, .5][p.stance] * (p.moving > 3 ? .75 : 1) * Math.min(1, .35 + a.combatT / 4) * (p.vehicle ? .6 : 1) * (p.hostage ? .5 : 1);
   ph = clamp(ph, .01, .85);
@@ -2038,7 +2070,7 @@ function civThink(a, dt, players) {
     for (const p of players) { const v = canSee(a, p, 34 * Math.min(2, visMul(p)), 2.6); if (v > bv) { bv = v; best = p; } }
     if (best) { a.sus += dt * (.25 + bv * 1.6) * (best.vehicle ? .35 : 1); a.yaw = turnTo(a.yaw, yawTo(best.x - a.x, best.z - a.z), dt * 2); a.lastP = best; }
     else a.sus = Math.max(0, a.sus - dt * .08);
-    if (a.sus >= 1) { a.st = 'report'; a.t0 = G.t; a.rep = { x: best.x, z: best.z, why: '市民發現了可疑武裝人員並報警' }; feed(`市民 ${a.id_.name} 發現了你，正在打電話報警！`, 'bad'); }
+    if (a.sus >= 1) { a.st = 'report'; a.t0 = G.t; a.rep = { x: best.x, z: best.z, why: '市民發現了可疑武裝人員並報警' }; feed(`市民 ${a.id_.name} 發現了你，正在打電話報警！`, 'bad'); sayL('civ_call', a, { pri: 2 }); }
     // 屍體 / 傷者
     if ((a.bodyT = (a.bodyT || 0) - dt) < 0) { a.bodyT = 1.2; for (const b of A.list) if (b.down && b !== a && !b.civFound && hyp(b.x - a.x, b.z - a.z) < 18 && los(a.x, a.y + 1.6, a.z, b.x, b.y + .3, b.z)) { b.civFound = true; a.st = 'report'; a.t0 = G.t; a.rep = { x: b.x, z: b.z, why: `市民發現倒地的${b.k === 'pla' ? '士兵' : '人'}並報警` }; break; } }
   }
@@ -2339,21 +2371,21 @@ function driveVeh(v, dt) {
   v.x = clamp(v.x, BOUND.x0, BOUND.x1); v.z = clamp(v.z, BOUND.z0, BOUND.z1);
   // 撞到人
   if (Math.abs(v.v) > 4) { const f = vehCircles(v)[v.v > 0 ? 0 : 2]; for (const a of A.list) { if (a.down || a.st === 'car' || a.st === 'safe' || (P.hostage === a)) continue; if (hyp(a.x - f[0], a.z - f[1]) < v.Wd + .5) { applyHit(a, 220, Math.abs(v.v) > 12 ? 'torso' : 'limb', Net.me, fx, fz); a.x += fx * 1.5; a.z += fz * 1.5; Snd._o(160, 60, .15, .6); v.v *= .75; } } }
-  placeVeh(v); v.hl.visible = true;
+  placeVeh(v); v.hl.visible = true; Snd.engine(true, v.v);
   P.x = v.x; P.z = v.z; P.y = 0; P.yaw = v.yaw; P.moving = Math.abs(v.v);
   Snd.setWind(clamp(Math.abs(v.v) / 60, 0, .25));
 }
 function enterVeh(v) {
   if (v.driver && v.driver !== Net.me) { feed('隊友正在駕駛', 'info'); return; }
   if (P.hostage) { feed('先處理人質再上車', 'info'); return; }
-  P.vehicle = v; v.driver = Net.me; P.stance = 0; P.lean = 0; In.ads = false; feed(v.bus ? '開走公車 — 搖桿＝油門/方向' : '上車 — 搖桿＝油門/方向，互動鍵下車', 'info'); Snd._o(60, 90, .6, .25, 0, 'sawtooth');
+  P.vehicle = v; v.driver = Net.me; sayT('car', { cd: 20 }); P.stance = 0; P.lean = 0; In.ads = false; feed(v.bus ? '開走公車 — 搖桿＝油門/方向' : '上車 — 搖桿＝油門/方向，互動鍵下車', 'info'); Snd._o(60, 90, .6, .25, 0, 'sawtooth');
   Net.send({ t: 'veh', ci: v.ci, x: v.x, z: v.z, yaw: v.yaw, v: 0, d: Net.me });
 }
 function exitVeh() {
   const v = P.vehicle; if (!v) return; if (Math.abs(v.v) > 5) { feed('車速太快，先減速', 'info'); return; }
   const rx = Math.cos(v.yaw), rz = -Math.sin(v.yaw);
   for (const s of [-1, 1]) { const x = v.x - rx * s * (v.Wd + .7), z = v.z - rz * s * (v.Wd + .7); if (!solidAt(x, z)) { P.x = x; P.z = z; break; } }
-  P.vehicle = null; v.driver = null; v.v = 0; v.hl.visible = false; P.y = groundAt(P.x, P.z, 1); Snd.setWind(0);
+  P.vehicle = null; v.driver = null; v.v = 0; v.hl.visible = false; Snd.engine(false); P.y = groundAt(P.x, P.z, 1); Snd.setWind(0);
   for (const a of A.list) if (a.k === 'vip' && a.st === 'car' && a.car === v) { a.st = 'follow'; a.x = v.x + rx * (v.Wd + .8); a.z = v.z + rz * (v.Wd + .8); a.car = null; }
   Net.send({ t: 'veh', ci: v.ci, x: v.x, z: v.z, yaw: v.yaw, v: 0, d: null });
 }
@@ -2374,15 +2406,18 @@ function findActions() {
   const out = { p: null, s: null }; if (!P || !P.alive || P.air || P.rappel || G.state !== 'play') return out;
   if (P.down) return out;
   if (P.vehicle) { out.p = { k: 'exit', n: '下車', hold: 0, run: exitVeh }; return out; }
-  if (P.hostage) { const h = P.hostage; out.p = { k: 'tie', n: `把 ${h.id_.name} 綁起來`, hold: 1.4, run: () => { const a = P.hostage; P.hostage = null; a.st = 'tied'; a.x = P.x - Math.sin(P.yaw) * .9; a.z = P.z - Math.cos(P.yaw) * .9; downOrSend(a, 'tied'); } };
-    out.s = { k: 'free', n: '放走', hold: 0, run: () => { const a = P.hostage; P.hostage = null; a.st = 'report'; a.t0 = G.t; a.rep = { x: P.x, z: P.z, why: '被放走的市民報警' }; a.fleeFrom = { x: P.x, z: P.z }; Net.send({ t: 'act', a: 'free', id: a.id, x: P.x, z: P.z }); feed(`${a.id_.name} 跑走了 — 他會去報警`, 'bad'); } }; return out; }
+  if (P.hostage) { const h = P.hostage, sol = h.k === 'pla'; out.p = { k: 'tie', n: `把 ${h.id_.name} 綁起來${sol ? '（制伏）' : ''}`, hold: 1.4, run: () => { const a = P.hostage; sayT('tie'); P.hostage = null; a.x = P.x - Math.sin(P.yaw) * .9; a.z = P.z - Math.cos(P.yaw) * .9; if (sol) { a.st = 'idle'; downOrSend(a, 'subdued'); } else { a.st = 'tied'; downOrSend(a, 'tied'); } } };
+    out.s = { k: 'free', n: '放走', hold: 0, run: () => { sayT('free'); const a = P.hostage; P.hostage = null; Net.send({ t: 'act', a: 'free', id: a.id, x: P.x, z: P.z });
+      if (a.k === 'pla') { a.st = 'combat'; a.alert = 1; a.tgtId = Net.me; a.seen = { x: P.x, z: P.z, t: G.t }; a.combatT = 0; a.x -= Math.sin(P.yaw) * .8; a.z -= Math.cos(P.yaw) * .8; feed(`${a.id_.name} 掙脫了，正在反擊！`, 'bad'); alertNear(a, 40); }
+      else { a.st = 'report'; a.t0 = G.t; a.rep = { x: P.x, z: P.z, why: '被放走的市民報警' }; a.fleeFrom = { x: P.x, z: P.z }; feed(`${a.id_.name} 跑走了 — 他會去報警`, 'bad'); } } }; return out; }
   const cands = [];
   for (const m of Net.mates.values()) if (m.s && m.s.down && hyp(m.x - P.x, m.z - P.z) < 2.2) cands.push([0, { k: 'revive', n: `救起隊友 ${m.name}`, hold: 3, run: () => Net.sendTo(m.id, { t: 'revive' }) }]);
   for (const a of A.list) {
     const d = hyp(a.x - P.x, a.z - P.z); if (d > 3) continue; const fd = facingDist(a.x, a.z);
     if (a.k === 'vip' && a.st === 'captive' && d < 2.3) cands.push([1 + fd * .01, { k: 'save', n: `救援 ${a.id_.name}（解開束帶）`, hold: 3, run: () => rescueVip(a) }]);
     else if (a.k === 'agent' && !a.down && d < 2.6) cands.push([1.5 + fd * .01, { k: 'talk', n: `與情報員「青鳥」接頭`, hold: 0, run: () => openAgentTalk(a) }]);
-    else if (a.k === 'pla' && !a.down && d < 1.9) { const behind = Math.abs(angDiff(yawTo(P.x - a.x, P.z - a.z), a.yaw)) > 1.7; if (behind || a.st !== 'combat') cands.push([2 + fd, { k: 'subdue', n: `制伏 ${a.id_.rank} ${a.id_.name}（不致命）`, hold: behind ? .8 : 1.6, run: () => downOrSend(a, 'subdued') }]); }
+    else if (a.k === 'pla' && !a.down && a.st !== 'hostage' && d < 1.9) { const behind = Math.abs(angDiff(yawTo(P.x - a.x, P.z - a.z), a.yaw)) > 1.7, sub = { k: 'subdue', n: `制伏 ${a.id_.rank} ${a.id_.name}（不致命）`, hold: behind ? .8 : 1.6, run: () => { sayT('subdue'); downOrSend(a, 'subdued'); } };
+      if (behind) cands.push([2 + fd, { k: 'grab', n: `劫持 ${a.id_.rank} ${a.id_.name}`, hold: .6, run: () => grabCiv(a), s: sub }]); else if (a.st !== 'combat') cands.push([2 + fd, sub]); }
     else if (a.k === 'civ' && !a.down && a.st !== 'tied' && d < 1.9) cands.push([3 + fd, { k: 'grab', n: `劫持 ${a.id_.name}（${a.id_.age}歲・${a.id_.job}）`, hold: .5, run: () => grabCiv(a) }]);
     else if (a.k === 'pla' && a.down && !a.looted && d < 1.8 && G.diff < 2) cands.push([6 + fd, { k: 'loot', n: '搜刮彈藥', hold: 1, run: () => { a.looted = 1; for (const w of P.wp) w.res += Math.ceil(w.st.mag * .8); feed('取得彈藥', 'good'); Snd.ui(); }, sec: 1 }]);
   }
@@ -2399,19 +2434,19 @@ function findActions() {
   const edge = roofEdge(); if (edge) cands.push([8, { k: 'rope', n: '垂降到地面', hold: .8, run: () => startRappel(edge) }]);
   cands.sort((a, b) => a[0] - b[0]);
   if (cands.length) { const c = cands[0][1]; out.p = c; if (c.s) out.s = c.s; else { const s2 = cands.find(q => q[1] !== c && q[1].sec); if (s2) out.s = s2[1]; } }
-  if (!out.s && P.medkits > 0 && P.hp < 85) out.s = { k: 'med', n: `使用血包（剩 ${P.medkits}）`, hold: 0, run: () => { P.medkits--; P.hp = 100; $('hurt').style.opacity = 0; feed(`血量回滿（剩 ${P.medkits} 個血包）`, 'good'); Snd.good(); } };
+  if (!out.s && P.medkits > 0 && P.hp < 85) out.s = { k: 'med', n: `使用血包（剩 ${P.medkits}）`, hold: 0, run: () => { P.medkits--; P.hp = 100; sayT('medkit', { cd: 8 }); $('hurt').style.opacity = 0; feed(`血量回滿（剩 ${P.medkits} 個血包）`, 'good'); Snd.good(); } };
   if (!out.s && P.hasSuit) out.s = P.suitOn ? { k: 'suit', n: '脫下西裝', hold: 1.5, run: () => wearSuit(false) } : { k: 'suit', n: '穿上西裝（偽裝）', hold: 2.5, run: () => wearSuit(true) };
   return out;
 }
 function downOrSend(a, how) { if (Net.host) downActor(a, how, Net.me); else { Net.send({ t: 'act', a: how, id: a.id, x: a.x, z: a.z }); a.down = how; a.st = how; } Snd._n(.15, 500, 1, .4, 0); }
 function grabCiv(a) {
   if (P.cur !== 1) swapWeapon(1);
-  P.hostage = a; a.st = 'hostage'; a.sus = 0; a.called = false; setSign(a, null); P.stance = 0; G.stats.hostages++;
-  feed(`劫持了 ${a.id_.name} — 敵人會投鼠忌器`, 'info'); Net.send({ t: 'act', a: 'grab', id: a.id });
+  sayT('grab'); setTimeout(() => sayL(a.k === 'pla' ? 'pla_held' : 'civ_grab', a, { cd: 0, pri: 2 }), 1400); P.hostage = a; a.st = 'hostage'; a.sus = 0; a.alert = 0; a.path = null; a.called = false; setSign(a, null); P.stance = 0; G.stats.hostages++;
+  feed(`劫持了 ${a.id_.rank ? a.id_.rank + ' ' : ''}${a.id_.name} — 敵人會投鼠忌器`, 'info'); Net.send({ t: 'act', a: 'grab', id: a.id });
 }
 function rescueVip(a) {
   a.st = 'follow'; a.lead = Net.me; a.stance = 'stand'; G.stats.rescued++;
-  feed(`救出 ${a.id_.name}！${a.id_.job} — 帶他到外灘碼頭撤離`, 'good'); Snd.good(); exfilBeam.visible = true;
+  feed(`救出 ${a.id_.name}！${a.id_.job} — 帶他到外灘碼頭撤離`, 'good'); Snd.good(); sayT('rescue', { pri: 3, cd: 0 }); setTimeout(() => VO.say(TAI['vip' + a.rec.v][0], 'vip', { id: 'vip_' + a.rec.v, pri: 3, cd: 0, fem: a.rec.v === 1 }), 2600); exfilBeam.visible = true;
   Net.send({ t: 'act', a: 'rescue', id: a.id, by: Net.me });
 }
 // 垂降
@@ -2438,7 +2473,7 @@ function updateActions(dt) {
 
 /* ---------- 偽裝（簡單難度的空投西裝） ---------- */
 function disguised() { return !!(P && P.suitOn && G.t - P.lastShot > 10 && P.adsK < .5 && !P.hostage && G.t - (P.suitT || -99) > 0); }
-function wearSuit(on) { P.suitOn = on; P.suitT = G.t + .5; buildViewmodel(); feed(on ? '換上西裝 — 遠處的人不會認出你；開槍、瞄準或劫持會暴露身分' : '脫下西裝', 'info'); Snd.ui(); }
+function wearSuit(on) { if (on) sayT('suit'); P.suitOn = on; P.suitT = G.t + .5; buildViewmodel(); feed(on ? '換上西裝 — 遠處的人不會認出你；開槍、瞄準或劫持會暴露身分' : '脫下西裝', 'info'); Snd.ui(); }
 /* ---------- 空投汽車與補給（簡單難度） ---------- */
 function airdrop(x, z, remote) {
   for (let k = 0; k < 20; k++) { const a = Math.random() * TAU, r = 12 + Math.random() * 25, px = x + Math.cos(a) * r, pz = z + Math.sin(a) * r; if (!solidAt(px, pz) && !solidAt(px + 2.5, pz) && !solidAt(px - 2.5, pz) && !isWater(px, pz)) { x = px; z = pz; break; } }
@@ -2580,6 +2615,154 @@ function updateMates(dt) {
 }
 
 /* =====================================================================
+   09.5 語音與音效：敵軍／市民說普通話，我方與情報員說台語
+   台語：優先裝置的台語語音(nan-TW) → voice/<id>.mp3 錄音檔 → 台灣口音語音念台語字幕
+   ===================================================================== */
+const VO = {
+  on: store.get('voice', true), voices: [], zhCN: null, zhTW: null, nan: null, busy: 0, last: {}, miss: {}, cur: null,
+  init() {
+    this.probe();
+    if (!('speechSynthesis' in window)) return;
+    const load = () => { this.voices = speechSynthesis.getVoices(); const f = re => this.voices.find(v => re.test(v.lang.replace('_', '-')));
+      this.nan = f(/^nan/i); this.zhTW = f(/^zh-TW/i) || f(/^zh-HK/i); this.zhCN = f(/^zh-CN/i) || f(/^cmn/i) || f(/^zh/i); };
+    load(); speechSynthesis.onvoiceschanged = load;
+  },
+  probe() { fetch('voice/me_land.mp3', { method: 'HEAD' }).then(r => { this.files = r.ok; }).catch(() => { this.files = false; }); },
+  unlock() { if (this.unlocked || !('speechSynthesis' in window)) return; this.unlocked = true; try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) { } },
+  // who: 'pla' 敵軍 | 'civ' 市民 | 'me' 我方 | 'agent' 情報員 | 'vip'；dist = 與玩家距離
+  say(text, who, o = {}) {
+    if (!this.on || G.state === 'load') return;
+    const d = o.dist || 0; if (d > (who === 'pla' ? 70 : 45)) return;
+    const k = o.key || text; if (G.t - (this.last[k] ?? -99) < (o.cd ?? 6)) return;
+    const pr = o.pri || 1; if (this.busy > G.t && pr <= (this.curPri || 0)) return;
+    this.last[k] = G.t; const tai = who === 'me' || who === 'agent' || who === 'vip';
+    if (tai && o.id && this.files && !this.miss[o.id] && !this.nan) return this.file(o.id, text, who, d, pr);
+    this.tts(text, who, d, pr, o);
+  },
+  file(id, text, who, d, pr) {
+    const a = new Audio(`voice/${id}.mp3`); a.volume = clamp(1 - d / 50, .2, 1);
+    a.onerror = () => { this.miss[id] = 1; this.tts(text, who, d, pr, {}); };
+    a.onloadedmetadata = () => { this.busy = G.t + a.duration; this.curPri = pr; };
+    if (this.cur && this.cur.pause) this.cur.pause(); this.cur = a; a.play().catch(() => { this.miss[id] = 1; this.tts(text, who, d, pr, {}); });
+  },
+  tts(text, who, d, pr, o) {
+    const vol = clamp(1 - d / (who === 'pla' ? 80 : 55), .15, 1), bab = () => Snd.babble(text, who, vol, o.fem);
+    if (!('speechSynthesis' in window) || (this.voices.length === 0 && speechSynthesis.getVoices().length === 0)) { this.busy = G.t + Math.min(6, text.length * .14); this.curPri = pr; return bab(); }
+    const tai = who === 'me' || who === 'agent' || who === 'vip', u = new SpeechSynthesisUtterance(text.replace(/[「」（）《》]/g, ''));
+    u.voice = tai ? (this.nan || this.zhTW || this.zhCN) : (this.zhCN || this.zhTW); u.lang = u.voice ? u.voice.lang : (tai ? 'zh-TW' : 'zh-CN');
+    u.volume = clamp(1 - d / (who === 'pla' ? 80 : 55), .15, 1);
+    u.rate = who === 'pla' ? 1.15 : who === 'civ' ? 1.2 : who === 'agent' ? .95 : 1.05;
+    u.pitch = o.fem ? 1.35 : who === 'pla' ? .8 : who === 'agent' ? .7 : who === 'vip' ? 1.05 : .9;
+    if (pr >= 2 || (this.busy > G.t && pr > (this.curPri || 0))) speechSynthesis.cancel();
+    this.busy = G.t + text.length * .2 + .4; this.curPri = pr; let started = false; u.onstart = () => { started = true; };
+    speechSynthesis.speak(u); setTimeout(() => { if (!started && !speechSynthesis.speaking) { this.silent = (this.silent || 0) + 1; bab(); } }, 1300);
+  },
+  stop() { try { speechSynthesis.cancel(); } catch (e) { } if (this.cur && this.cur.pause) this.cur.pause(); this.busy = 0; },
+};
+const dP = a => P ? hyp(a.x - P.x, a.z - P.z) : 99;
+// 台詞
+const LINES = {
+  pla_spot: ['發現敵人！', '在那邊！開火！', '有敵人！', '是台灣的特種兵！'],
+  pla_sus: ['什麼人？', '那邊好像有動靜。', '誰在那裡？出來！', '過去看看。'],
+  pla_search: ['分頭找！', '他跑不遠的！', '仔細搜！'],
+  pla_hostage: ['放開人質！', '別亂來！放下槍！', '不許傷害老百姓！'],
+  pla_held: ['別開槍！別開槍！', '我投降……別殺我！'],
+  pla_freeH: ['放開他！', '別傷害他！'],
+  pla_hit: ['我中彈了！', '啊！我的腿！', '醫護兵！'],
+  pla_body: ['這裡有人倒下了！快叫人！', '有人受傷了！'],
+  pla_reinf: ['增援到了，散開搜索！'],
+  civ_flee: ['救命啊！', '有槍！快跑！', '殺人啦！'],
+  civ_call: ['喂，一一零嗎？這裡有拿槍的人！', '快報警！有軍人拿著槍！'],
+  civ_grab: ['不要殺我！', '我什麼都不會說的！'],
+};
+const TAI = {
+  land: ['落地矣，開始行動。', 'land'], reload: ['換彈匣！', 'reload'], contact: ['有敵人，注意！', 'contact'], rescue: ['國軍來救恁矣，綴我行！', 'rescue'],
+  subdue: ['莫振動！', 'subdue'], grab: ['莫出聲，綴我行！', 'grab'], tie: ['歹勢，委屈你一下。', 'tie'], free: ['緊走！', 'free'], exfil: ['船佇遐，緊上船！', 'exfil'],
+  door: ['門開矣。', 'door'], car: ['上車！', 'car'], hurt: ['我著銃矣！', 'hurt'], medkit: ['無要緊，閣會使。', 'medkit'], suit: ['換衫，假做普通人。', 'suit'],
+  vip0: ['多謝恁……我閣會使行。', 'vip0'], vip1: ['多謝……我真驚……阮爸母敢有平安？', 'vip1'], win: ['任務完成，咱轉去台灣。', 'win'],
+};
+const sayL = (set, a, o = {}) => VO.say(pick(LINES[set]), a.k === 'civ' ? 'civ' : 'pla', Object.assign({ dist: dP(a), key: set + a.id, fem: a.id_ && a.id_.fem }, o));
+const sayT = (k, o = {}) => VO.say(TAI[k][0], 'me', Object.assign({ id: 'me_' + TAI[k][1], key: 'me_' + k }, o));
+// 情報員台詞：[中文字幕, 台語語音, 錄音檔 id]
+function agentLines(g, n, vs, hard) {
+  if (!G.met) { const L = [
+    ['……梁山的人？口令。', '……梁山來的？口令。', 'ag01'],
+    ['「青鳥歸巢」。好，跟我進來，別站在路燈下。', '「青鳥歸巢」。好，緊入來，莫徛佇路燈下。', 'ag02'],
+    ['我是周明德，在這裡待了十一年。你們要找的兩個人，林振宇關在人民公園北側的臨時營區，許雅婷關在人民廣場博物館前的營區。', '我是周明德，佇遮蹛十一冬矣。恁欲揣的兩个人，林振宇關佇人民公園北爿的臨時營區，許雅婷關佇人民廣場博物館頭前的營區。', 'ag03'],
+    [`公園那邊現在有 ${g[0]} 個兵，廣場那邊有 ${g[1]} 個，各有兩座瞭望塔上的狙擊手。市中心八個路口都設了檢查哨，那些兵是精銳，槍法很準。`, `公園遐這馬有 ${g[0]} 个兵，廣場遐有 ${g[1]} 个，兩爿攏有瞭望台頂的狙擊手。市中心八个路口攏有檢查哨，遐的兵是精銳，銃法真準。`, 'ag04'],
+    ['聽著：街上的老百姓一旦看到你，馬上就會報警，到時候整個東部戰區的部隊都會往這裡壓。蹲低、走暗處，別在人多的地方開槍。', '聽好：街仔路的百姓若看著你，隨就會報警，到時陣規个東部戰區的部隊攏會衝來遮。跍較低咧、行暗路，人濟的所在莫開銃。', 'ag05'],
+    ['這些兵大多是十八九歲的孩子，跟你我一樣有爸媽在等。能不殺就別殺——打腿、從背後制伏，一樣能讓他們沒法擋路。', '遮的兵大部分是十八、九歲的囡仔，佮你我仝款，有爸母咧等。會當莫刣就莫刣——拍跤、對後壁共制伏，仝款會當予伊袂當擋路。', 'ag06'],
+    ['路邊的車大多能撬開，載著人跑比走路快。撤離船在外灘碼頭，一到就走。地圖我幫你標好了。保重。', '路邊的車大部分攏撬會開，載人走較緊。撤離的船佇外灘碼頭，一到就走。地圖我共你標好矣。保重。', 'ag07']];
+    if (hard) L.push(['……抱歉，我這裡已經被盯上了，沒辦法給你任何補給。', '……歹勢，我遮已經予人盯牢矣，無法度予你啥物補給。', 'ag08']);
+    return L; }
+  if (n === 0) return [['還沒救到人？時間不多了。', '猶未救著人？時間無濟矣。', 'ag11'], [`營區裡現在還有 ${g[0]} 和 ${g[1]} 個守衛。從南京路的小巷繞過去，比走大路安全。`, `營區內底猶閣有 ${g[0]} 佮 ${g[1]} 个守衛。對南京路的巷仔踅過去，較安全。`, 'ag12'], ['去吧，保重。', '去吧，保重。', 'ag13']];
+  const left = g[vs.findIndex(v => v.st === 'captive')] || 0;
+  if (n === 1) return [['救出一個了，很好。', '救出一个矣，真好。', 'ag21'], [`另一個營區還有 ${left} 個守衛，他們現在一定提高警覺了。`, `另外一个營區猶閣有 ${left} 个守衛，怹這馬一定加真細膩矣。`, 'ag22'], ['如果被追，就鑽進建築物裡，他們不一定找得到你。', '若予人逐，就覕入去厝內，怹無一定揣會著你。', 'ag23'], ['撤離船會一直等到時間結束。', '撤離的船會一直等到時間到。', 'ag24']];
+  return [['兩個人都救出來了？太好了……', '兩个攏救出來矣？傷好矣……', 'ag31'], ['外灘碼頭的船已經發動。沿著黃浦江邊走，別上延安高架。', '外灘碼頭的船已經發動矣。沿黃浦江邊行，莫起去延安高架。', 'ag32'], ['告訴她們家裡——有人一直在找她們。', '共怹厝裡講——一直有人咧揣怹。', 'ag33']];
+}
+
+/* ---------- 引擎聲、結局配樂與環境音 ---------- */
+Object.assign(Snd, {
+  // 沒有語音引擎時的「講話聲」：共振峰合成的音節
+  babble(text, who, vol = 1, fem) {
+    const c = this.ctx; if (!c) return; const n = clamp(Math.round(text.replace(/[，。！？、…—「」\s]/g, '').length * .8), 2, 26);
+    const base = fem ? 210 : who === 'pla' ? 115 : who === 'agent' ? 100 : who === 'civ' ? 160 : 130, sp = who === 'agent' ? .17 : .13;
+    const V = [[730, 1090], [270, 2290], [300, 870], [530, 1840], [570, 840], [440, 1020], [660, 1700]];
+    let t = c.currentTime + .02;
+    for (let k = 0; k < n; k++) {
+      const d = sp * (.75 + Math.random() * .6), v = V[Math.floor(Math.random() * V.length)], o = c.createOscillator(), g = c.createGain(), f1 = c.createBiquadFilter(), f2 = c.createBiquadFilter(), m = c.createGain();
+      o.type = 'sawtooth'; const p = base * (1 + (Math.random() - .5) * .25) * (k === n - 1 ? .85 : 1); o.frequency.setValueAtTime(p, t); o.frequency.linearRampToValueAtTime(p * (Math.random() < .5 ? .92 : 1.08), t + d);
+      f1.type = f2.type = 'bandpass'; f1.frequency.value = v[0]; f2.frequency.value = v[1]; f1.Q.value = 6; f2.Q.value = 9;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.16 * vol, t + .025); g.gain.setValueAtTime(.14 * vol, t + d * .7); g.gain.linearRampToValueAtTime(0, t + d);
+      o.connect(f1); o.connect(f2); f1.connect(m); f2.connect(m); m.gain.value = .9; m.connect(g); g.connect(this.out); o.start(t); o.stop(t + d + .02);
+      t += d + (Math.random() < .18 ? .12 : .02);
+    }
+  },
+  eng: null,
+  engine(on, v) {
+    const c = this.ctx; if (!c) return;
+    if (!this.eng && on) { const o = c.createOscillator(), o2 = c.createOscillator(), f = c.createBiquadFilter(), g = c.createGain(); o.type = 'sawtooth'; o2.type = 'square'; f.type = 'lowpass'; f.frequency.value = 600; g.gain.value = 0; o.connect(f); o2.connect(f); f.connect(g); g.connect(this.out); o.start(); o2.start(); this.eng = { o, o2, f, g }; }
+    if (!this.eng) return; const t = c.currentTime, s = Math.abs(v || 0);
+    this.eng.o.frequency.setTargetAtTime(38 + s * 3.2, t, .1); this.eng.o2.frequency.setTargetAtTime(19 + s * 1.6, t, .1); this.eng.f.frequency.setTargetAtTime(350 + s * 40, t, .1);
+    this.eng.g.gain.setTargetAtTime(on ? .07 + Math.min(.08, s * .004) : 0, t, .15);
+  },
+  tone(f, dur, vol, type = 'sine', att = .02, delay = 0) {
+    const c = this.ctx; if (!c) return; const t = c.currentTime + delay, o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.value = f; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + att); g.gain.exponentialRampToValueAtTime(.0005, t + dur);
+    o.connect(g); g.connect(this.out); o.start(t); o.stop(t + dur + .05);
+  },
+  pad(chord, dur, vol = .05) { for (const f of chord) { this.tone(f, dur, vol, 'triangle', dur * .35); this.tone(f * 2.003, dur, vol * .3, 'sine', dur * .4); } },
+  bell(f = 880, vol = .12) { this.tone(f, 3.2, vol, 'sine', .005); this.tone(f * 2.76, 1.6, vol * .3, 'sine', .005); this.tone(f * 5.4, .8, vol * .12, 'sine', .005); },
+  bird() { const c = this.ctx; if (!c) return; const t = c.currentTime, o = c.createOscillator(), g = c.createGain(), b = 2400 + Math.random() * 1800; o.type = 'sine';
+    for (let k = 0; k < 4; k++) { o.frequency.setValueAtTime(b, t + k * .09); o.frequency.exponentialRampToValueAtTime(b * 1.5, t + k * .09 + .06); }
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.05, t + .02); g.gain.exponentialRampToValueAtTime(.0005, t + .42); o.connect(g); g.connect(this.out); o.start(t); o.stop(t + .45); },
+  rainLoop: null,
+  rain(on) { const c = this.ctx; if (!c) return;
+    if (on && !this.rainLoop) { const s = c.createBufferSource(); s.buffer = this.nb; s.loop = true; const f = c.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 1800; const g = c.createGain(); g.gain.value = 0; s.connect(f); f.connect(g); g.connect(this.out); s.start(); g.gain.setTargetAtTime(.16, c.currentTime, 1.5); this.rainLoop = { s, g }; }
+    if (!on && this.rainLoop) { this.rainLoop.g.gain.setTargetAtTime(0, c.currentTime, .5); const r = this.rainLoop; setTimeout(() => { try { r.s.stop(); } catch (e) { } }, 2000); this.rainLoop = null; } },
+  thunder() { this._n(2.6, 260, .5, .5, 0); this.tone(40, 2, .25, 'sine', .1); },
+  echo(vol, pan) { setTimeout(() => this._n(.35, 900, .5, .18 * vol, -pan * .5), 120 + Math.random() * 60); setTimeout(() => this._n(.5, 600, .4, .09 * vol, pan * .3), 300 + Math.random() * 120); },
+  casing() { const f = 4200 + Math.random() * 1500; setTimeout(() => { this.tone(f, .08, .03, 'triangle'); this.tone(f * 1.3, .06, .02, 'triangle', .002, .07); }, 380 + Math.random() * 150); },
+});
+// 槍聲加回音
+const _shot0 = Snd.shot.bind(Snd);
+Snd.shot = function (kind, vol = 1, pan = 0) { _shot0(kind, vol, pan); if (kind !== 'sup' && this.ctx) this.echo(vol, pan); };
+// 結局配樂（每幀呼叫）
+const CSND = { t: 0, next: 0, li: -1, win: -1 };
+function cineSound(dt) {
+  if (!Snd.ctx) return; const tier = CINE.tier, t = CINE.t;
+  if (t < .05) { CSND.next = 0; CSND.li = -1; CSND.win = -1; Snd.rain(tier === 2); }
+  const chords = [[[261.6, 329.6, 392], [220, 329.6, 440], [349.2, 440, 523.3], [392, 493.9, 587.3]], [[220, 261.6, 329.6], [174.6, 220, 261.6], [196, 246.9, 293.7], [164.8, 196, 246.9]], [[196, 233.1, 293.7], [155.6, 196, 233.1], [174.6, 207.7, 261.6], [146.8, 174.6, 220]], [[55, 82.4, 110], [51.9, 77.8, 103.8], [49, 73.4, 98], [46.2, 69.3, 92.5]]][tier];
+  if (t >= CSND.next) { const k = Math.floor(CSND.next / 4.5) % 4; Snd.pad(chords[k], 5.5, tier === 3 ? .07 : .045); CSND.next += 4.5; }
+  if (tier === 0 && Math.random() < dt * .9) Snd.bird();
+  if (tier === 2 && Math.random() < dt * .07) Snd.thunder();
+  if (tier === 1) { const n = CINE.dead.length; for (let i = 0; i < n; i++) if (t > i * 1.2 && !CINE['b' + i]) { CINE['b' + i] = 1; Snd.bell(660 + i * 110, .1); } }
+  if (tier === 3) { const step = (CINE.dur - 6) / CINE.k, off = Math.floor((t - 2.5) / step); if (off > CSND.win && off < CINE.k) { CSND.win = off; Snd.click(500); Snd.tone(110, .6, .05, 'sine'); } }
+  const per = (CINE.dur - 3) / CINE.lines.length, li = Math.floor((t - 1.5) / per);
+  if (li !== CSND.li && li >= 0 && li < CINE.lines.length) { CSND.li = li; Snd.tone(tier === 0 ? 1046 : 784, 1.8, .03, 'sine', .3); }
+}
+
+/* =====================================================================
    09 介面：圓形圖示按鍵（可自訂位置/大小）、選單、HUD、地圖、對話、身分標籤
    ===================================================================== */
 const ICO = {
@@ -2629,7 +2812,7 @@ const BTN_DEF = [
   { id: 'leanR', ic: 'leanR', n: '右探頭', x: .37, y: .15, s: 12 },
   { id: 'use', ic: 'use', n: '互動', x: .7, y: .42, s: 14.5, look: 1 },
   { id: 'use2', ic: 'use2', n: '副互動', x: .6, y: .5, s: 11.5, look: 1 },
-  { id: 'joy', ic: 'move', n: '移動搖桿', x: .15, y: .72, s: 24 },
+  { id: 'joy', ic: 'move', n: '移動搖桿', x: .16, y: .74, s: 24 },
 ];
 let LAYOUT = store.get('layout', {});
 const lay = d => Object.assign({ x: d.x, y: d.y, s: d.s }, LAYOUT[d.id] || {});
@@ -2775,11 +2958,13 @@ function updateHUD(dt) {
   $('obj').textContent = resc === 0 ? (G.intel ? '救出人民公園與人民廣場的 2 名重要人員' : '找到並救出關押在市中心的 2 名重要人員（可先找情報員接頭）') : resc < 2 ? `已救出 ${resc}/2 — 繼續救援，或先撤離` : '護送 2 名重要人員到外灘碼頭撤離點';
   // 隱匿狀態
   let mx = 0, tag = 0; for (const a of A.list) { if (a.down) continue; if (a.k === 'pla') { mx = Math.max(mx, a.st === 'combat' ? 1 : a.alert); if (a.st === 'combat' && a.vis && a.vis.local) tag = 2; } if (a.k === 'civ') { mx = Math.max(mx, a.st === 'report' ? 1 : a.sus); if (a.st === 'report') tag = Math.max(tag, 1); } }
+  if (tag === 2) sayT('contact', { cd: 40 });
+  if (A.list.some(v => v.k === 'vip' && (v.st === 'follow' || v.st === 'car')) && hyp(P.x - EXFIL.x, P.z - EXFIL.z) < 70) sayT('exfil', { cd: 60, pri: 2 });
   const s = $('stealth'), lvl = G.alarmT > 0 || tag === 2 ? 2 : mx > .25 ? 1 : 0; s.className = 's' + lvl;
   $('stT').textContent = G.alarmT > 0 ? `警報中 ${Math.ceil(G.alarmT)}s` : tag === 2 ? '交戰' : tag === 1 ? '有人在報警！' : mx > .25 ? '可疑' : '隱匿'; $('stM').style.width = (lvl === 2 ? 100 : mx * 100) + '%';
   const alive = A.list.filter(a => a.k === 'pla' && !a.down).length; $('enemyN').textContent = `敵軍 ${alive}`;
   // 生命／武器
-  $('hpT').textContent = Math.ceil(P.hp); $('hpF').style.width = P.hp + '%'; $('stance').textContent = (disguised() ? '【偽裝中】' : P.suitOn ? '【偽裝已暴露】' : '') + `血包 ${P.medkits}　` + (P.vehicle ? `駕駛中 ${Math.round(Math.abs(P.vehicle.v) * 3.6)} km/h` : P.swim ? '游泳' : P.air ? (P.air === 'fall' ? '自由落體' : '傘降') : P.hostage ? `劫持 ${P.hostage.id_.name}` : STN[P.stance]);
+  $('hpT').textContent = Math.ceil(P.hp); $('hpF').style.width = P.hp + '%'; $('stF').style.width = P.sta + '%'; $('stb').className = P.exhausted ? 'ex' : P.sta < 30 ? 'lo' : ''; $('stance').textContent = (disguised() ? '【偽裝中】' : P.suitOn ? '【偽裝已暴露】' : '') + `血包 ${P.medkits}　` + (P.vehicle ? `駕駛中 ${Math.round(Math.abs(P.vehicle.v) * 3.6)} km/h` : P.swim ? '游泳' : P.air ? (P.air === 'fall' ? '自由落體' : '傘降') : P.hostage ? `劫持 ${P.hostage.id_.name}` : STN[P.stance]);
   const W_ = curW(); $('wpN').textContent = W_.w.n + (W_.st.sup ? '（消音）' : ''); $('ammo').textContent = P.reloadT > 0 ? '換彈' : W_.ammo; $('res').textContent = W_.res;
   // 準星：散布大小
   const sp = W_.st.sp * W_.st.hip * [1, .8, .6][P.stance] * (1 + P.moving * .22) * (1 + P.spreadK), gap = clamp(sp * 1.2, .5, 7) * (1 - P.adsK * .85);
@@ -2897,23 +3082,15 @@ function showDZ() {
 // 情報員對話
 function openAgentTalk(a) {
   const vs = A.list.filter(v => v.k === 'vip'), n = vs.filter(v => v.st !== 'captive').length, guards = WORLD.compounds.map(c => A.list.filter(e => e.k === 'pla' && !e.down && hyp(e.x - c.cx, e.z - c.cz) < 40).length);
-  let L;
-  if (!G.met) L = ['……梁山的人？口令。', '「青鳥歸巢」。好，跟我進來，別站在路燈下。',
-    `我是周明德，在這裡待了十一年。你們要找的兩個人，林振宇關在人民公園北側的臨時營區，許雅婷在人民廣場博物館前的營區。`,
-    `公園那邊現在有 ${guards[0]} 個兵，廣場那邊 ${guards[1]} 個，各有兩座瞭望塔上的狙擊手。市中心八個路口都設了檢查哨，那些兵是精銳，槍法很準。`,
-    '聽著：街上的老百姓一旦看到你，馬上就會報警，到時候整個東部戰區的部隊都會往這裡壓。蹲低、走暗處、別在人多的地方開槍。',
-    '這些兵大多是十八九歲的孩子，跟你我一樣有爸媽在等。能不殺就別殺——打腿、從背後制伏，一樣能讓他們沒法擋路。',
-    '路邊的車大多能撬開，載著人跑比走路快。撤離船在外灘碼頭，一到就走。給你彈藥和一個醫療包，地圖我也幫你標好了。保重。'];
-  else if (n === 0) L = ['還沒救到人？時間不多了。', `營區裡現在還有 ${guards[0]} 和 ${guards[1]} 個守衛。從南京路的小巷繞過去，比走大路安全。`, '補給再給你一些。去吧。'];
-  else if (n === 1) L = ['救出一個了，很好。', `另一個營區還有 ${guards[vs.findIndex(v => v.st === 'captive')] || 0} 個守衛，他們現在一定提高警覺了。`, '如果被追，鑽進建築物裡，他們不一定找得到你。', '撤離船會一直等到時間結束。'];
-  else L = ['兩個人都救出來了？太好了……', '外灘碼頭的船已經發動。沿著黃浦江邊走，別上延安高架。', '告訴她們家裡——有人一直在找她們。'];
+  const LT = agentLines(guards, n, vs, G.diff === 2);
+  const L = LT.map(x => x[0]); TALK.tai = LT.map(x => x[1]); TALK.ids = LT.map(x => x[2]);
   if (!G.met && Net.host) feed('情報員標記了人質位置與守衛哨點', 'good');
-  G.met = true; G.intel = true; if (G.diff < 2) { for (const w of P.wp) w.res += w.st.mag * 2; P.medkits++; } else L.push('……抱歉，我這裡已經被盯上了，沒辦法給你任何補給。');
+  G.met = true; G.intel = true; if (G.diff < 2) { for (const w of P.wp) w.res += w.st.mag * 2; P.medkits++; }
   TALK.lines = L; TALK.i = 0; TALK.who = a.id_; $('talk').classList.remove('hidden'); showTalk(); Snd.ui();
 }
 const TALK = { lines: [], i: 0 };
-function showTalk() { $('talkN').textContent = `${TALK.who.name}・${TALK.who.job}`; $('talkT').textContent = TALK.lines[TALK.i]; $('talkNext').textContent = TALK.i < TALK.lines.length - 1 ? '繼續 ▶' : '結束'; }
-function nextTalk() { TALK.i++; if (TALK.i >= TALK.lines.length) { $('talk').classList.add('hidden'); return; } showTalk(); Snd.ui(); }
+function showTalk() { $('talkN').textContent = `${TALK.who.name}・${TALK.who.job}`; $('talkT').textContent = TALK.lines[TALK.i]; VO.say(TALK.tai[TALK.i], 'agent', { id: TALK.ids[TALK.i], pri: 3, cd: 0, key: 'talk' }); $('talkNext').textContent = TALK.i < TALK.lines.length - 1 ? '繼續 ▶' : '結束'; }
+function nextTalk() { TALK.i++; if (TALK.i >= TALK.lines.length) { $('talk').classList.add('hidden'); VO.stop(); return; } showTalk(); Snd.ui(); }
 
 /* =====================================================================
    10 主程式：任務流程、結束動畫、主迴圈
@@ -2935,7 +3112,7 @@ function jump() {
   feed('離開機艙 — 自由落體中，按「跳」開傘', 'info');
   if (G.diff === 2 && Net.host && !G.forewarned) forewarn(DZ.x, DZ.z);
   if (!isTouch && canvas.requestPointerLock) canvas.requestPointerLock();
-  try { if (isTouch && document.documentElement.requestFullscreen && !document.fullscreenElement) document.documentElement.requestFullscreen().then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(() => { })).catch(() => { }); } catch (e) { }
+  if (isTouch && landscape()) goFull();
 }
 function playerDown(why) {
   if (P.hostage) { const h = P.hostage; P.hostage = null; h.st = 'report'; h.t0 = G.t; h.rep = { x: P.x, z: P.z, why: '人質逃脫後報警' }; }
@@ -2957,7 +3134,7 @@ function endGame(win, why, remote) {
   if (G.state === 'end') return; G.state = 'end'; G.win = win; G.why = why; G.usedT = 1800 - G.timeLeft;
   if (Net.host && !remote) Net.send({ t: 'end', w: win, why, st: G.stats });
   if (document.exitPointerLock) document.exitPointerLock();
-  In.fire = false; In.ads = false; Snd.setWind(0);
+  In.fire = false; In.ads = false; Snd.setWind(0); Snd.engine(false); if (win) sayT('win', { pri: 3, cd: 0 });
   $('hud').classList.add('hidden'); $('talk').classList.add('hidden'); $('pause').classList.add('hidden');
   setTimeout(startCine, 900);
 }
@@ -2997,7 +3174,7 @@ function startCine() {
   Snd.setWind(CINE.tier === 2 ? .18 : 0);
 }
 function updateCine(dt) {
-  if (!CINE.on) return; CINE.t += dt; const t = CINE.t, c = $('cinec'), g = c.getContext('2d'), Wc = c.width, Hc = c.height;
+  if (!CINE.on) return; CINE.t += dt; cineSound(dt); const t = CINE.t, c = $('cinec'), g = c.getContext('2d'), Wc = c.width, Hc = c.height;
   // 3D 鏡頭：沿外灘緩緩升起
   const u = t / CINE.dur; camera.position.set(lerp(540, 600, u), lerp(14, 70, u), lerp(160, -60, u)); camera.lookAt(800, lerp(40, 120, u), -100); camera.fov = 55; camera.updateProjectionMatrix();
   g.clearRect(0, 0, Wc, Hc);
@@ -3027,7 +3204,7 @@ function updateCine(dt) {
   if (t > CINE.dur) finishCine();
 }
 function finishCine() {
-  if (!CINE.on) return; CINE.on = false; $('cine').classList.add('hidden'); $('gl').style.filter = ''; Snd.setWind(0);
+  if (!CINE.on) return; CINE.on = false; $('cine').classList.add('hidden'); $('gl').style.filter = ''; Snd.setWind(0); Snd.rain(false);
   const S = G.stats, k = S.dead.length, score = S.rescued * 25 + (G.win ? 30 : 0) - k * 5 - S.civDead.length * 20 - G.alarms * 4 + (k === 0 ? 25 : 0) + S.subdued.length;
   const grade = score >= 85 ? 'S' : score >= 65 ? 'A' : score >= 45 ? 'B' : score >= 25 ? 'C' : 'D';
   $('endT').textContent = (G.win ? '任務成功' : '救援失敗') + `　評價 ${grade}`; $('endT').style.color = G.win ? '#7fd88a' : '#ff7a6a';
@@ -3057,7 +3234,9 @@ function wireMenu() {
   $('bPause').onclick = () => togglePause(); $('btnResume').onclick = () => togglePause(false);
   $('btnQuit').onclick = () => { $('pause').classList.add('hidden'); G.paused = false; endGame(false, '任務被放棄。'); };
   $('bMap').onclick = () => toggleMap(); $('bigmap').onclick = () => toggleMap(false);
+  $('mini').addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); toggleMap(true); Snd.ui(); });
   $('btnAgain').onclick = () => location.reload();
+  $('voice').checked = VO.on; $('voice').onchange = e => { VO.on = e.target.checked; store.set('voice', VO.on); if (!VO.on) VO.stop(); else VO.say('語音已開啟', 'me', { cd: 0, pri: 3 }); };
   const D = $('diff'); const setD = d => { G.diff = d; store.set('diff', d); D.querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.d === d)); $('diffTip').textContent = ['5 個血包＋空投汽車與西裝偽裝', '2 個血包，敵人完全不知情', '沒有補給，敵人已提前埋伏'][d]; };
   D.onclick = e => { const b = e.target.closest('button'); if (b) { setD(+b.dataset.d); Snd.ui(); } }; setD(G.diff);
   $('talkNext').onclick = nextTalk; $('cine').onclick = () => { if (CINE.t > 2) finishCine(); };
@@ -3110,14 +3289,33 @@ function boot() {
   $('loadmsg').textContent = '正在建構上海市區（人民廣場、南京路、外灘、陸家嘴）…';
   setTimeout(() => {
     try {
-      initMaterials(); buildWorld(); applyQuality(); initFx(); initMenu(); buildButtons(); wireMenu();
-      G.state = 'menu'; $('loading').classList.add('hidden'); $('menu').classList.remove('hidden');
+      VO.init(); initMaterials(); buildWorld(); applyQuality(); initFx(); initMenu(); buildButtons(); wireMenu();
+      G.state = 'menu'; $('loading').classList.add('hidden'); $('menu').classList.remove('hidden'); fsCheck();
       if (!store.get('seenHelp', false)) { $('help').classList.remove('hidden'); store.set('seenHelp', true); }
     } catch (e) { $('loadmsg').textContent = '載入失敗：' + e.message; console.error(e); }
     requestAnimationFrame(frame);
   }, 60);
 }
-document.addEventListener('pointerdown', () => Snd.init(), { once: true });
+document.addEventListener('pointerdown', () => { Snd.init(); VO.unlock(); }, { once: true });
+/* ---------- 橫向自動全螢幕 ---------- */
+const FS = { api: !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen), standalone: matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches || navigator.standalone === true, iosHint: false };
+const isFull = () => !!(document.fullscreenElement || document.webkitFullscreenElement) || FS.standalone;
+const landscape = () => innerWidth > innerHeight;
+function goFull(rot) {
+  const el = document.documentElement, rq = el.requestFullscreen || el.webkitRequestFullscreen;
+  const lock = () => { try { screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(() => { }); } catch (e) { } };
+  if (!rq || isFull()) { lock(); return; }
+  try { const pr = rq.call(el, { navigationUI: 'hide' }); if (pr && pr.then) pr.then(lock).catch(() => { if (rot) $('rotSub').textContent = '這個瀏覽器（或 App 內預覽）不允許全螢幕，請用 Chrome／Safari 開啟網址，或直接把手機轉橫。'; }); else lock(); } catch (e) { }
+}
+function fsCheck() {
+  document.body.classList.toggle('inplay', G.state === 'play');
+  $('fsBtn').classList.toggle('hidden', !(isTouch && FS.api && landscape() && !isFull() && G.state !== 'load'));
+  if (!FS.api) $('rotSub').textContent = 'iPhone：請手動轉成橫向。想要沒有網址列，請點 Safari「分享」→「加入主畫面」，從主畫面開啟。';
+  if (!FS.api) $('rotBtn').classList.add('hidden');
+}
+$('rotBtn').onclick = () => { Snd.init(); VO.unlock(); goFull(true); };
+$('fsBtn').onclick = e => { e.stopPropagation(); goFull(); };
+for (const ev of ['fullscreenchange', 'webkitfullscreenchange', 'resize', 'orientationchange']) (ev.includes('full') ? document : window).addEventListener(ev, () => setTimeout(() => { fsCheck(); onResize(); applyLayout(); }, 150));
 window.addEventListener('keydown', e => { if (e.code === 'KeyF') In.use = true; if (e.code === 'KeyG') In.use2 = true; });
 window.addEventListener('keyup', e => { if (e.code === 'KeyF') In.use = false; if (e.code === 'KeyG') In.use2 = false; });
 boot();
